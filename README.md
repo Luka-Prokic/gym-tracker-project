@@ -10,15 +10,14 @@ Built with **TypeScript**, the app allows users to customize routines, log exerc
 ### ✅ Implemented
 - 📋 **Routine customization** – add and organize exercises  
 - ⏱️ **Workout timer** with automatic rest tracking  
-- 🗂️ **Widget-based layout** for flexible exercise organization  
-- 🎨 **Multiple themes** (light, dark, oldschool, peachy)  
+- 🗂️ **Widget-based layout** for flexible home screen organization  
+- 🎨 **Multiple themes** (light, dark, oldschool, peachy,...)  
 - 💾 **Offline-first** – no internet required  
 
 ### 🚧 In Progress
 - 📊 **Graphs and visual stats** for tracking performance  
 - 🔄 **Data syncing** and export options  
 - 🌐 **Online features** – profile sharing and copying workouts  
-- 🤌 **Gesture controls** for faster navigation  
 
 ---
 
