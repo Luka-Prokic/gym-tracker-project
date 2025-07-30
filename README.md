@@ -1,50 +1,48 @@
-# Welcome to your Expo app 👋
+# 🏋️‍♂️ Corrupt – Gym Workout Logger (WIP)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A sleek, **iOS-inspired React Native app** for tracking gym workouts.  
+Built with **TypeScript**, the app allows users to customize routines, log exercises, and track progress completely offline.  
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Features (Current Progress)
 
-   ```bash
-   npm install
-   ```
+### ✅ Implemented
+- 📋 **Routine customization** – add and organize exercises  
+- ⏱️ **Workout timer** with automatic rest tracking  
+- 🗂️ **Widget-based layout** for flexible exercise organization  
+- 🎨 **Multiple themes** (light, dark, oldschool, peachy)  
+- 💾 **Offline-first** – no internet required  
 
-2. Start the app
+### 🚧 In Progress
+- 📊 **Graphs and visual stats** for tracking performance  
+- 🔄 **Data syncing** and export options  
+- 🌐 **Online features** – profile sharing and copying workouts  
+- 🤌 **Gesture controls** for faster navigation  
 
-   ```bash
-    npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🖼️ Screenshots
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Home Screen | Routine Editor |
+|-------------|---------------|
+| ![Home](./screenshots/home.png) | ![Routine](./screenshots/routine.png) |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🛠️ Tech Stack
 
-When you're ready, run:
+- [React Native](https://reactnative.dev/) + TypeScript  
+- [Expo](https://expo.dev/)  
+- [Zustand](https://github.com/pmndrs/zustand) for state management  
+- [MMKV](https://github.com/mrousavy/react-native-mmkv) for fast offline storage  
+
+---
+
+## ⚡️ Getting Started
+
+### 1. Clone the repository
 
 ```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+git clone https://github.com/Luka-Prokic/corrupt-gym-tracker.git
+cd corrupt-gym-tracker
