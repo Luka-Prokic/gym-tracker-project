@@ -21,11 +21,30 @@ Built with **TypeScript**, the app allows users to customize routines, log exerc
 
 ---
 
-## 🖼️ Screenshots
+## 🖼️ App Screenshots
 
-| Home Screen | Routine Editor |
-|-------------|---------------|
-| ![Home](./screenshots/home.png) | ![Routine](./screenshots/routine.png) |
+### 🎨 Themes
+The app includes **6 beautifully designed themes** – 3 light and 3 dark:
+
+| Light | Peachy | Oldschool |
+|-------|--------|-----------|
+| ![Light](./screenshots/theme-light.png) | ![Peachy](./screenshots/theme-peachy.png) | ![Oldschool](./screenshots/theme-oldschool.png) |
+
+| Dark | Preworkout | Corrupted |
+|------|------------|-----------|
+| ![Dark](./screenshots/theme-dark.png) | ![Preworkout](./screenshots/theme-preworkout.png) | ![Corrupted](./screenshots/theme-corrupted.png) |
+
+
+### 🏋️ Core Features
+| Add Exercise to Routine | Superset Input Table | Exercise Input Table |
+|--------------------------|---------------------|----------------------|
+| ![Add Exercise](./screenshots/add-exercise.png) | ![Superset](./screenshots/superset-table.png) | ![Exercise Input](./screenshots/exercise-input.png) |
+
+
+### 🏠 Home Screen
+| Edit Home Mode | Long Press on Widget | Active Routine (Timer) |
+|----------------|----------------------|------------------------|
+| ![Edit Home](./screenshots/edit-home.png) | ![Long Press](./screenshots/long-press-widget.png) | ![Routine Timer](./screenshots/routine-timer.png) |
 
 ---
 
