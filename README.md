@@ -38,7 +38,7 @@ The app includes **6 beautifully designed themes** – 3 light and 3 dark:
 ### 🏋️ Core Features
 | Add Exercise to Routine | Superset Input Table | Exercise Input Table |
 |--------------------------|---------------------|----------------------|
-| ![Add Exercise](./screenshots/add-exercise.png) | ![Superset](./screenshots/superset-table.png) | ![Exercise Input](./screenshots/exercise-input.png) |
+| ![Add Exercise](./screenshots/add-exercise.png) | ![Superset](./screenshots/superset-input.png) | ![Exercise Input](./screenshots/exercise-input.png) |
 
 
 ### 🏠 Home Screen
