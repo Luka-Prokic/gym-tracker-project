@@ -62,5 +62,5 @@ The app includes **6 beautifully designed themes** – 3 light and 3 dark:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Luka-Prokic/corrupt-gym-tracker.git
-cd corrupt-gym-tracker
+git clone https://github.com/Luka-Prokic/gym-tracker-project.git
+cd gym-tracker-project
