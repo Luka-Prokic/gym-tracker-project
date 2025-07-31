@@ -28,7 +28,7 @@ The app includes **6 beautifully designed themes** – 3 light and 3 dark:
 
 | Light | Peachy | Oldschool |
 |-------|--------|-----------|
-| ![Light](./screenshots/theme-light.png) | ![Peachy](./screenshots/theme-peachy.png) | ![Oldschool](./screenshots/theme-oldschool.png) |
+| ![Light](./screenshots/theme-light.png) | ![Peachy](./screenshots/theme-peachy.png) | ![Oldschool](./screenshots/theme-old-school.png) |
 
 | Dark | Preworkout | Corrupted |
 |------|------------|-----------|
