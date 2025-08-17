@@ -11,7 +11,7 @@ Built with **TypeScript**, the app allows users to customize routines, log exerc
 -  **Routine customization** – add and organize exercises  
 -  **Workout timer** with automatic rest tracking  
 -  **Widget-based layout** for flexible home screen organization  
--  **Multiple themes** (light, dark, oldschool, peachy,...)  
+-  **Multiple themes** (light, dark, + 4 custom themes)  
 -  **Offline-first** – no internet required  
 
 ### 🚧 In Progress
@@ -24,7 +24,7 @@ Built with **TypeScript**, the app allows users to customize routines, log exerc
 ## App Screenshots
 
 ### Themes
-The app includes **6 beautifully designed themes** – 3 light and 3 dark:
+The app includes 3 light and 3 dark themes:
 
 | Light | Peachy | Oldschool |
 |-------|--------|-----------|
