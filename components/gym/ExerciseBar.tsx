@@ -7,9 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import hexToRGBA from "../../assets/hooks/HEXtoRGB";
 import IButton from "../buttons/IButton";
 import Container from "../containers/Container";
-import { RootStackParamList } from "../../assets/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { GymTable } from "./gym_table/GymTable";
 import { ExerciseWidget } from "./ExerciseWidget";
 import { LayoutItem, useExerciseLayout } from "../context/ExerciseLayoutZustand";
@@ -26,19 +24,15 @@ import useBubbleLayout from "../bubbles/hooks/useBubbleLayout";
 const MAX_VISIBLE_CELLS = 5;
 const CELL_HEIGHT = 44;
 
-const ExerciseBar: React.FC = () => {
+const ExerciseBar: React.FC = React.memo(() => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
     const { getLayout } = useExerciseLayout();
     const { activeRoutine } = useRoutine();
     const { bubbleVisible, popBubble, makeBubble } = useBubbleLayout();
 
     const template = getLayout(activeRoutine.layoutId);
-    if (!template)
-        return null;
-
     const layout = useMemo(() => template?.layout ?? [], [template]);
     const id = activeRoutine.layoutId;
 
@@ -163,7 +157,7 @@ const ExerciseBar: React.FC = () => {
                                 <View style={styles.grid}>
                                     {layout.map((ex: LayoutItem, index: number) => {
                                         const commonProps = {
-                                            key: index,
+                                            key: `${ex.id}-${index}`,
                                             id: String(ex.id),
                                             layoutId: id,
                                             customHeight: CELL_HEIGHT,
@@ -192,7 +186,7 @@ const ExerciseBar: React.FC = () => {
                                     ]}
                                 >
                                     <IButton height={CELL_HEIGHT} width={"100%"} onPress={() => {
-                                        navigation.navigate("Modals", { screen: "AddExercise", params: { layoutId: id } });
+                                        router.push(`/modals/addExercise?layoutId=${id}`);
                                     }}>
                                         <Ionicons name="add" size={24} color={color.accent} />
                                     </IButton>
@@ -244,7 +238,7 @@ const ExerciseBar: React.FC = () => {
 
         </View >
     );
-};
+});
 
 const styles = StyleSheet.create({
     bar: {

@@ -99,6 +99,29 @@ export const createCardioExercisesZustand = (set: any, get: any) => ({
         value: CardioSettings[K]
     ) => {
         set((state: any) => {
+            // Staging-aware: If layout is being edited, update staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (found && isCardioExercise(found.exercise)) {
+                        const ce = found.exercise as CardioExercise;
+                        found.parent[found.index] = {
+                            ...ce,
+                            settings: {
+                                ...ce.settings,
+                                [key]: value,
+                            },
+                        };
+                        newStagingLayouts.set(layoutId, { ...currentStaging, layout: items });
+                        return { stagingLayouts: newStagingLayouts };
+                    }
+                }
+            }
+
+            // Otherwise update persisted version directly
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
                 const items = [...layout.layout];

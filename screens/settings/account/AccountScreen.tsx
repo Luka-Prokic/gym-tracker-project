@@ -4,18 +4,17 @@ import Colors, { Themes } from '../../../constants/Colors';
 import { Text } from 'react-native';
 import Container from '../../../components/containers/Container';
 import { ScrollView } from 'react-native-gesture-handler';
-import CardWrapper from '../../../components/bubbles/CardWrapper';
 
 export default function AccountScreen() {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
 
     return (
-        <CardWrapper>
+        <View style={{ flex: 1, backgroundColor: color.background }}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 style={[{
-                    paddingBottom: 88, paddingTop: 44, width: "100%", height: "100%",
+                    paddingBottom: 88, paddingTop: 44, width: "100%", height: "100%", backgroundColor: color.background,
                 }]}
             >
                 <Container color={color.secondaryBackground} height={64} width={200}>
@@ -31,7 +30,7 @@ export default function AccountScreen() {
                     <Text style={[styles.text, { color: color.secondaryText }]}>Five</Text>
                 </Container>
             </ScrollView>
-        </CardWrapper>
+        </View>
     );
 }
 

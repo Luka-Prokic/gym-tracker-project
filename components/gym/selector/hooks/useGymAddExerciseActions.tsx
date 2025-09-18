@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BodypartType, EquipmentType, useExercise, Exercise } from "@/components/context/ExerciseZustand";
 import { useExerciseLayout, Layout } from "@/components/context/ExerciseLayoutZustand";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 export type EquipmentFilterType = EquipmentType | "All Equipment";
 export type BodypartFilterType = BodypartType | "All Muscles";
@@ -9,7 +9,6 @@ export type BodypartFilterType = BodypartType | "All Muscles";
 export const useGymAddExerciseActions = (layoutId: Layout["id"]) => {
     const { exercises, getExercise } = useExercise();
     const { addGymExercise, addCardioExercise, createSuperSet, addToSuperSet } = useExerciseLayout();
-    const navigation = useNavigation();
 
     const [muscle, setMuscle] = useState<BodypartFilterType>("All Muscles");
     const [equipment, setEquipment] = useState<EquipmentFilterType>("All Equipment");
@@ -35,7 +34,7 @@ export const useGymAddExerciseActions = (layoutId: Layout["id"]) => {
                 return addCardioExercise(layoutId, ex.id);
         }
         ));
-        navigation.goBack();
+        router.back();
     };
 
     const handleSuperFin = async () => {
@@ -54,7 +53,7 @@ export const useGymAddExerciseActions = (layoutId: Layout["id"]) => {
 
         await Promise.all(newSsElements.map((exId) => addToSuperSet(layoutId, ssId, exId)));
 
-        navigation.goBack();
+        router.back();
     };
 
     const filteredExercisesList = exercises.filter((exercise) => {

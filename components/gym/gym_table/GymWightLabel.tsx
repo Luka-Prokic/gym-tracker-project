@@ -14,9 +14,10 @@ import ISlideToggle from "@/components/bubbles/ISlideToggle";
 interface GymColumnLabelsProps {
     exerciseId: GymExercise["id"];
     heightAnim: Animated.Value;
+    readOnly?: boolean;
 }
 
-const GymWightLabel: React.FC<GymColumnLabelsProps> = ({ exerciseId, heightAnim }) => {
+const GymWightLabel: React.FC<GymColumnLabelsProps> = ({ exerciseId, heightAnim, readOnly }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const { exercise } = useGymActions(exerciseId);
@@ -35,28 +36,45 @@ const GymWightLabel: React.FC<GymColumnLabelsProps> = ({ exerciseId, heightAnim 
 
     return (
         <>
-            <IButton style={styles.columnLabel} onPress={makeBubble}>
-                <Animated.Text
-                    style={{
-                        color: color.grayText,
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
-                        opacity: headerOpacity,
-                    }}
-                >
-                    {weightUnit}
-                </Animated.Text>
-            </IButton>
+            {readOnly ? (
+                <View style={styles.columnLabel}>
+                    <Animated.Text
+                        style={{
+                            color: color.grayText,
+                            fontWeight: "bold",
+                            textTransform: "uppercase",
+                            opacity: headerOpacity,
+                        }}
+                    >
+                        {weightUnit}
+                    </Animated.Text>
+                </View>
+            ) : (
+                <>
+                    <IButton style={styles.columnLabel} onPress={makeBubble}>
+                        <Animated.Text
+                            style={{
+                                color: color.grayText,
+                                fontWeight: "bold",
+                                textTransform: "uppercase",
+                                opacity: headerOpacity,
+                            }}
+                        >
+                            {weightUnit}
+                        </Animated.Text>
+                    </IButton>
 
-            <ISlideToggle
-                visible={bubbleVisible}
-                onClose={popBubble}
-                option1="kg"
-                option2="lbs"
-                value={weightUnit}
-                onChange={toggleWeightUnit}
-                title="WEIGHT UNIT"
-            />
+                    <ISlideToggle
+                        visible={bubbleVisible}
+                        onClose={popBubble}
+                        option1="kg"
+                        option2="lbs"
+                        value={weightUnit}
+                        onChange={toggleWeightUnit}
+                        title="WEIGHT UNIT"
+                    />
+                </>
+            )}
         </>
     );
 };

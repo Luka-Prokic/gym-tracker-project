@@ -13,6 +13,7 @@ import useFlickerAnim from "../../../assets/animations/useFlickerAnim";
 import useMainHeaderHeightAnim from "./animations/useMainHeaderHeightAnim";
 import useCorruptedColor from "./hooks/useCorruptedColor";
 import useFadeInAnim from "@/assets/animations/useFadeInAnim";
+import { router } from "expo-router";
 
 interface MainHeaderProps extends NativeStackHeaderProps {
     scrollY: number;
@@ -71,7 +72,7 @@ const HeaderRight: React.FC<{
             ) : (
                 <IButton
                     onPress={() => {
-                        navigation.navigate("Settings", { screen: "Settings" });
+                        router.push("/settings");
                         openModal();
                     }}
                     height={44}
@@ -112,6 +113,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({ navigation, options, scrollY })
                 {
                     opacity: homeEditing ? 0 : opacity,
                     height: heightAnim,
+                    backgroundColor: color.background
                 },
             ]}
         >

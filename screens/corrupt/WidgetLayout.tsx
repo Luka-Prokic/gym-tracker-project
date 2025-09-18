@@ -6,18 +6,17 @@ import { DndProvider, Draggable, DraggableGrid, UniqueIdentifier } from "@mgcrea
 import { SCREEN_WIDTH } from "../../constants/ScreenWidth";
 import { useEffect, useState } from "react";
 import LEDstrip from "../../components/mis/LEDstrip";
-import { CorruptParamList } from "../../assets/types";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RoutineLayout, useRoutine } from "../../components/context/RoutineZustand";
+import { router } from "expo-router";
 import { useExerciseLayout } from "../../components/context/ExerciseLayoutZustand";
+import { useStartNewRoutine } from "../../assets/hooks/useStartNewRoutine";
 
 export default function WidgetLayout() {
     const { widgetLayout, setWidgetLayout, updateWidget } = useCaka();
     const { activeRoutine, setActiveRoutine, checkAndAddRoutine } = useRoutine();
     const { saveLayout } = useExerciseLayout();
+    const { startNewRoutine } = useStartNewRoutine();
     const [key, setKey] = useState(0);
-    const navigation = useNavigation<NativeStackNavigationProp<CorruptParamList, "Home">>();
 
     const { homeEditing } = useTheme();
 
@@ -44,53 +43,32 @@ export default function WidgetLayout() {
                 return {
                     ...widget,
                     labelPressed: () => {
-                        if (activeRoutine.id !== "routine_111" && activeRoutine?.id && activeRoutine.type === "gym") {
-
-                            navigation.navigate("Routine");
-                        } else {
-                            const newRoutineId = "routine_" + new Date().getTime();
-                            const newLayout = {
-                                id: "gym_" + new Date().getTime(),
-                                layout: [],
-                            };
-
-                            const newRoutine = {
-                                id: newRoutineId,
-                                layoutId: newLayout.id,
-                                timer: 0,
-                                status: "temp",
-                                type: "gym",
-                            };
-                            checkAndAddRoutine(newRoutine as RoutineLayout);
-                            setActiveRoutine(newRoutineId);
-                            saveLayout(newLayout);
-                            navigation.navigate("Routine");
-                        }
+                        startNewRoutine({ navigationMethod: 'push' });
                     },
-                    childrenPressed: () => navigation.navigate("Routines"),
+                    childrenPressed: () => router.push("/routines"),
                 };
             }
             //statistics
             if (widget.id === "12234d") {
                 return {
                     ...widget,
-                    labelPressed: () => navigation.navigate("Stats"),
-                    childrenPressed: () => navigation.navigate("Stats"),
+                    labelPressed: () => router.push("/stats"),
+                    childrenPressed: () => router.push("/stats"),
                 };
             }
             return widget;
         });
         setWidgetLayout(updatedLayout);
-    }, [navigation, activeRoutine]);
+    }, [activeRoutine]);
 
 
     useEffect(() => {
         if (activeRoutine.id !== "routine_111" && activeRoutine?.id && activeRoutine.type === "gym") {
             updateWidget("11233d", { label: "Continue" });
-            updateWidget("11233d", { childrenPressed: () => navigation.navigate("Routine") });
+            updateWidget("11233d", { childrenPressed: () => router.push("/routine") });
         } else {
             updateWidget("11233d", { label: "Quick Start" });
-            updateWidget("11233d", { childrenPressed: () => navigation.navigate("Routines") });
+            updateWidget("11233d", { childrenPressed: () => router.push("/routines") });
         }
     }, [activeRoutine])
 

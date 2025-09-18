@@ -28,6 +28,22 @@ export const createGymExercisesZustand = (set: any, get: any) => ({
                 type: "gym",
             };
 
+            // If layout is being edited, update staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                
+                if (currentStaging) {
+                    const updatedLayout = {
+                        ...currentStaging,
+                        layout: [...currentStaging.layout, newExercise]
+                    };
+                    newStagingLayouts.set(layoutId, updatedLayout);
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
+            // Otherwise update persisted version directly (for backward compatibility)
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
                 return { ...layout, layout: [...layout.layout, newExercise] };
@@ -41,6 +57,28 @@ export const createGymExercisesZustand = (set: any, get: any) => ({
 
     removeGymExercise: (layoutId: Layout["id"], exId: GymExercise["id"]) => {
         set((state: any) => {
+            // If layout is being edited, update the staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (found) {
+                        found.parent.splice(found.index, 1);
+                    }
+
+                    const cleaned = items.filter(item =>
+                        item.type !== "superset" ||
+                        ((item as SuperSet).layout.length > 0)
+                    );
+
+                    newStagingLayouts.set(layoutId, { ...currentStaging, layout: cleaned });
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
+            // Otherwise update persisted version directly
             const layouts = state.layouts.map((l: Layout) => {
                 if (l.id !== layoutId) return l;
 
@@ -73,6 +111,22 @@ export const createGymExercisesZustand = (set: any, get: any) => ({
 
     swapExercise: (layoutId: Layout["id"], exId: GymExercise["id"], newExerciseId: Exercise["id"]) =>
         set((state: any) => {
+            // If layout is being edited, update staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (!found) return {};
+                    const parentList = found.parent;
+                    parentList[found.index] = { ...found.exercise, exId: newExerciseId };
+                    newStagingLayouts.set(layoutId, { ...currentStaging, layout: items });
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
+            // Otherwise update persisted version directly
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
 
@@ -97,6 +151,30 @@ export const createGymExercisesZustand = (set: any, get: any) => ({
         value: GymExerciseSettings[K]
     ) => {
         set((state: any) => {
+            // If layout is being edited, update staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (!found) return {};
+                    if (isGymExercise(found.exercise)) {
+                        const ge = found.exercise;
+                        found.parent[found.index] = {
+                            ...ge,
+                            settings: {
+                                ...ge.settings,
+                                [key]: value,
+                            },
+                        };
+                        newStagingLayouts.set(layoutId, { ...currentStaging, layout: items });
+                        return { stagingLayouts: newStagingLayouts };
+                    }
+                }
+            }
+
+            // Otherwise update persisted version directly
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
 

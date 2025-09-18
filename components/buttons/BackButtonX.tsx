@@ -1,17 +1,16 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors, { Themes } from "../../constants/Colors";
 import { useTheme } from "../context/ThemeContext";
 
 const BackButtonX: React.FC = () => {
-    const navigation = useNavigation();
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
 
     return (
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={styles.hitSlop}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} hitSlop={styles.hitSlop}>
             <Ionicons name="close" size={24} color={color.text} />
         </TouchableOpacity>
     );

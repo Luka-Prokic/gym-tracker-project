@@ -1,36 +1,41 @@
 import React from "react";
 import { View, Text, StyleSheet, Platform } from "react-native";
-import { NativeStackHeaderProps } from "@react-navigation/native-stack";
 import { FontAwesome } from "@expo/vector-icons";
 import IButton from "../buttons/IButton";
 import Colors, { Themes } from "../../constants/Colors";
-import hexToRGBA from "../../assets/hooks/HEXtoRGB";
 import { useTheme } from "../context/ThemeContext";
+import { router } from "expo-router";
+import capitalizeWords from "@/assets/hooks/capitalize";
 
-const SettingsHeader: React.FC<NativeStackHeaderProps> = ({
-    navigation,
-    route,
-    options,
-    back,
+interface SettingsHeaderProps {
+    title?: string;
+    headerLeft?: () => React.ReactNode;
+    headerRight?: (props: { tintColor: string }) => React.ReactNode;
+}
+
+const SettingsHeader: React.FC<SettingsHeaderProps> = ({
+    title = "Settings",
+    headerLeft,
+    headerRight,
 }) => {
     const { theme } = useTheme();
-    const title = options.title || route.name;
     const color = Colors[theme as Themes];
+    const titleFix = title == "index" ? "Settings" : capitalizeWords(title);
 
     return (
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: color.background }]}>
             <View style={styles.leftContainer}>
-                {options.headerLeft ? null : (
-                    <IButton width={34} height={34} onPress={navigation.goBack}>
+                {headerLeft ? headerLeft() : (
+                    <IButton width={34} height={34} onPress={() => router.back()}>
                         <FontAwesome name="angle-left" size={26} color={color.tint} />
                     </IButton>
                 )}
             </View>
             <View style={styles.titleContainer}>
-                <Text style={[styles.title, { color: color.text }]}>{title}</Text>
+                <Text style={[styles.title, { color: color.text }]}>{titleFix}</Text>
             </View>
             <View style={styles.rightContainer}>
-                {options.headerRight ? options.headerRight({ tintColor: color.text }) : null}
+                {headerRight ? headerRight({ tintColor: color.text }) : null}
             </View>
         </View>
     );
@@ -39,11 +44,10 @@ const SettingsHeader: React.FC<NativeStackHeaderProps> = ({
 const styles = StyleSheet.create({
     header: {
         height: 34,
-        backgroundColor: hexToRGBA(Colors.light.primaryBackground, 0.1),
         flexDirection: "row",
         alignItems: "center",
         borderBottomWidth: 0,
-        backdropFilter: "blur(10px",
+        backdropFilter: "blur(10px)",
         ...Platform.select({
             ios: {
                 shadowOpacity: 0,

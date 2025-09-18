@@ -4,7 +4,7 @@ import { defaultRoutine } from "../../constants/Defaults";
 import { Layout, useExerciseLayout } from "./ExerciseLayoutZustand";
 import { storage } from "./CakaAppZustand";
 
-export type RoutineStatus = "saved" | "temp";
+export type RoutineStatus = "template" | "routine";
 export type RoutineType = "gym" | "run" | "walk";
 
 export interface RoutineLayout {
@@ -12,8 +12,12 @@ export interface RoutineLayout {
     layoutId: Layout["id"];
     timer?: number;
     lastStartTime?: number;
+    startTime?: number;
+    endTime?: number;
     status: RoutineStatus;
     type: RoutineType;
+    isFinished?: boolean;
+    displayName?: string; // Custom display name for finished routines
 }
 
 export interface RoutineStoreState {
@@ -24,9 +28,13 @@ export interface RoutineStoreState {
     updateRoutine: (id: RoutineLayout["id"], newRoutine: Partial<RoutineLayout>) => void;
     setActiveRoutine: (id: RoutineLayout["id"]) => void;
     clearActiveRoutine: () => void;
+    clearActiveRoutineOnly: () => void;
+    cleanupGhostRoutines: () => void;
     loadRoutines: () => void;
     checkAndAddRoutine: (routine: RoutineLayout) => void;
     saveIt: (id: RoutineLayout["id"]) => void;
+    saveAsTemplate: (id: RoutineLayout["id"]) => void;
+    removeRoutine: (id: RoutineLayout["id"]) => void;
 
     time: number;
     timerStatus: "running" | "paused" | "stopped";
@@ -72,29 +80,177 @@ export const useRoutine = create<RoutineStoreState>((set, get) => {
 
         clearActiveRoutine: () => {
             storage?.delete("activeRoutine");
-            set((state) => ({
-                activeRoutine: defaultRoutine,
-                routines: state.routines.filter(routine => routine.status !== "temp"),
-            }));
+            set((state) => {
+                // Only clean up the current active routine if it's unfinished
+                const { discardStagingLayout, isLayoutBeingEdited, removeLayout, getLayout, savedLayouts } = useExerciseLayout.getState();
+                
+                // Discard staging changes for the active routine
+                if (isLayoutBeingEdited(state.activeRoutine.layoutId)) {
+                    discardStagingLayout(state.activeRoutine.layoutId);
+                }
+
+                // Only remove layout if it's the current active routine and it's not saved or used elsewhere
+                if (state.activeRoutine.status === "template" && !state.activeRoutine.isFinished) {
+                    const layout = getLayout(state.activeRoutine.layoutId);
+                    if (layout) {
+                        // Check if this layout is used by any other routines or is saved
+                        const isUsedByOtherRoutines = state.routines.some((r: any) => 
+                            r.layoutId === state.activeRoutine.layoutId && 
+                            r.id !== state.activeRoutine.id
+                        );
+                        const isUserSaved = savedLayouts.includes(state.activeRoutine.layoutId);
+                        
+                        // Only remove if not used elsewhere and not user-saved
+                        if (!isUsedByOtherRoutines && !isUserSaved) {
+                            removeLayout(state.activeRoutine.layoutId);
+                        }
+                    }
+                }
+
+                // Remove only the current active routine from routines list
+                const updatedRoutines = state.routines.filter(routine => routine.id !== state.activeRoutine.id);
+
+                return {
+                    activeRoutine: defaultRoutine,
+                    routines: updatedRoutines,
+                };
+            });
+        },
+
+        clearActiveRoutineOnly: () => {
+            storage?.delete("activeRoutine");
+            set({ activeRoutine: defaultRoutine });
+        },
+
+        cleanupGhostRoutines: () => {
+            const { layouts } = useExerciseLayout.getState();
+            set((state) => {
+                const validRoutines = state.routines.filter(routine => 
+                    layouts.some(layout => layout.id === routine.layoutId)
+                );
+                
+                if (validRoutines.length !== state.routines.length) {
+                    console.log('Cleaned up ghost routines:', state.routines.length - validRoutines.length);
+                    storage?.set("routines", JSON.stringify(validRoutines));
+                    return { routines: validRoutines };
+                }
+                
+                return {};
+            });
         },
 
         saveIt: (id: RoutineLayout["id"]) => {
             set((state: any) => {
+                const finishTime = Date.now();
+                const date = new Date(finishTime);
+                const currentDateString = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                });
+
+                // Generate display name for this routine
+                let displayName: string;
+                const routineToUpdate = state.routines.find((r: any) => r.id === id);
+                if (routineToUpdate) {
+                    const { getLayout, commitStagingLayout, isLayoutBeingEdited } = useExerciseLayout.getState();
+                    
+                    // If layout has staging changes, commit them when workout finishes
+                    if (isLayoutBeingEdited(routineToUpdate.layoutId)) {
+                        commitStagingLayout(routineToUpdate.layoutId);
+                    }
+                    
+                    const layout = getLayout(routineToUpdate.layoutId);
+                    if (layout) {
+                        const baseName = layout.name;
+
+                        // Find existing finished routines on the same day with similar base names
+                        const sameDayRoutines = state.routines.filter((r: any) =>
+                            r.isFinished === true &&
+                            r.lastStartTime &&
+                            r.displayName &&
+                            new Date(r.lastStartTime).toDateString() === date.toDateString() &&
+                            r.displayName.startsWith(`${baseName} - ${currentDateString}`)
+                        );
+
+                        // Count how many similar routines exist (including this one will be +1)
+                        const nextNumber = sameDayRoutines.length + 1;
+
+                        if (nextNumber > 1) {
+                            // Same day repeats - add #number
+                            displayName = `${baseName} - ${currentDateString} #${nextNumber}`;
+                        } else {
+                            // First of the day - just date
+                            displayName = `${baseName} - ${currentDateString}`;
+                        }
+                    }
+                }
+
                 const updatedRoutines = state.routines.map((r: any) =>
-                    r.id === id ? { ...r, status: "saved" } : r
+                    r.id === id ? {
+                        ...r,
+                        status: "routine",
+                        isFinished: true,
+                        lastStartTime: finishTime,
+                        displayName
+                    } : r
                 );
                 storage?.set("routines", JSON.stringify(updatedRoutines));
-                return { routines: updatedRoutines };
-            });
 
-            const updatedActiveRoutine = get().routines.find(r => r.id === id);
-            if (updatedActiveRoutine) {
-                set({ activeRoutine: updatedActiveRoutine });
-            }
+                const updatedActiveRoutine = updatedRoutines.find((r: any) => r.id === id);
+                return {
+                    routines: updatedRoutines,
+                    activeRoutine: updatedActiveRoutine || state.activeRoutine
+                };
+            });
         },
+
+        saveAsTemplate: (id: RoutineLayout["id"]) => {
+            set((state: any) => {
+                const routineToUpdate = state.routines.find((r: any) => r.id === id);
+                if (routineToUpdate) {
+                    const { commitStagingLayout, isLayoutBeingEdited } = useExerciseLayout.getState();
+                    
+                    // If layout has staging changes, commit them when saving as template
+                    if (isLayoutBeingEdited(routineToUpdate.layoutId)) {
+                        commitStagingLayout(routineToUpdate.layoutId);
+                    }
+                }
+
+                const updatedRoutines = state.routines.map((r: any) =>
+                    r.id === id ? { ...r, status: "template", isFinished: false } : r
+                );
+                storage?.set("routines", JSON.stringify(updatedRoutines));
+
+                const updatedActiveRoutine = updatedRoutines.find((r: any) => r.id === id);
+                return {
+                    routines: updatedRoutines,
+                    activeRoutine: updatedActiveRoutine || state.activeRoutine
+                };
+            });
+        },
+
+        removeRoutine: (id: RoutineLayout["id"]) => {
+            set((state: any) => {
+                const updatedRoutines = state.routines.filter((r: any) => r.id !== id);
+                storage?.set("routines", JSON.stringify(updatedRoutines));
+
+                // If the removed routine was active, clear it
+                const wasActive = state.activeRoutine?.id === id;
+                return {
+                    routines: updatedRoutines,
+                    activeRoutine: wasActive ? defaultRoutine : state.activeRoutine
+                };
+            });
+        },
+
 
         loadRoutines: () => {
             set({ routines: JSON.parse(storage?.getString("routines") || "[]") });
+            // Clean up ghost routines after loading
+            setTimeout(() => {
+                get().cleanupGhostRoutines();
+            }, 100);
         },
 
         checkAndAddRoutine: (routine: RoutineLayout) =>

@@ -5,7 +5,6 @@ import Colors, { Themes } from '../../constants/Colors';
 import SettingsButton from '../../components/buttons/SettingsButton';
 import List from '../../components/containers/List';
 import CakaIcon from '../../components/mis/CakaIcon';
-import ModalWrapper from '../../components/bubbles/ModalWrapper';
 import { useRoutine } from '../../components/context/RoutineZustand';
 
 export default function AllScreen() {
@@ -14,10 +13,9 @@ export default function AllScreen() {
     const { routines } = useRoutine();
 
     return (
-
         <ScrollView
             showsVerticalScrollIndicator={false}
-            style={[styles.blur, { paddingBottom: 88, paddingTop: 44, width: "100%", backgroundColor: color.secondaryBackground }]}
+            style={[styles.blur, { paddingBottom: 88, paddingTop: 44, width: "100%", backgroundColor: color.background }]}
         >
             <View style={styles.bubble}>
                 <List label="stats" background={color.thirdBackground} width={'90%'} hrStart="Custom">

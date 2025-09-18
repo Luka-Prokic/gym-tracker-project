@@ -13,7 +13,7 @@ export default function MeasurementsScreen() {
         <CardWrapper>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={{ paddingBottom: 88, paddingTop: 44, width: "100%" }}
+                style={{ paddingBottom: 88, paddingTop: 44, width: "100%", backgroundColor: color.background }}
             >
                 <ActivityIndicator size="large" />
             </ScrollView>

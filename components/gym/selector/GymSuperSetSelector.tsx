@@ -9,7 +9,7 @@ import { BodypartType, EquipmentType, Exercise } from "@/components/context/Exer
 import { useTheme } from "@/components/context/ThemeContext";
 import Colors, { Themes } from "@/constants/Colors";
 import { GymExercise, Layout, SuperSet, useExerciseLayout } from "@/components/context/ExerciseLayoutZustand";
-import { useRoute } from "@react-navigation/native";
+import { useLocalSearchParams } from "expo-router";
 import NoResults from "@/components/text/NoResults";
 import IButton from "@/components/buttons/IButton";
 import hexToRGBA from "@/assets/hooks/HEXtoRGB";
@@ -29,8 +29,7 @@ export const GymSuperSetSelector = () => {
     const { activeRoutine } = useRoutine();
 
     const layout = getLayout(activeRoutine.layoutId);
-    const route = useRoute();
-    const { layoutId, exId, superSetId } = route.params as { layoutId: Layout["id"], exId: GymExercise["id"], superSetId: SuperSet["id"] };
+    const { layoutId, exId, superSetId } = useLocalSearchParams<{ layoutId: Layout["id"], exId: GymExercise["id"], superSetId: SuperSet["id"] }>();
 
     const type = exId ? "exercise" : superSetId ? "superset" : "none";
 

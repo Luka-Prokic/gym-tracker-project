@@ -1,6 +1,6 @@
 import { storage } from "../CakaAppZustand";
 import { CardioExercise, GymExercise, Layout, LayoutItem, SuperSet } from "../ExerciseLayoutZustand";
-import { isGymExercise, isSuperSet, findAndUpdate, isCardioExercise } from "../utils/GymUtils";
+import { isGymExercise, isSuperSet, findAndUpdate, isCardioExercise, findExercise } from "../utils/GymUtils";
 
 export const createGymSetZustand = (set: any, get: any) => ({
     addRest: (
@@ -10,14 +10,20 @@ export const createGymSetZustand = (set: any, get: any) => ({
         restTime: number
     ) => {
         set((state: any) => {
-            const layouts = state.layouts.map((layout: Layout) => {
-                if (layout.id !== layoutId) return layout;
-
-                const newLayout = findAndUpdate(layout.layout, itemId, node => {
-                    if (isSuperSet(node)) {
-                        const sup = node as SuperSet;
+            // Staging-aware: If layout is being edited, update staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId) as Layout | undefined;
+                
+                if (currentStaging && currentStaging.layout) {
+                    const items = [...currentStaging.layout];
+                    
+                    // First check if itemId is a superset
+                    const supersetIndex = items.findIndex(item => isSuperSet(item) && item.id === itemId);
+                    if (supersetIndex !== -1) {
+                        const sup = items[supersetIndex] as SuperSet;
                         if (sup.settings.supersetType === 'circuit') {
-                            return {
+                            items[supersetIndex] = {
                                 ...sup,
                                 restLength: restTime,
                                 settings: {
@@ -26,37 +32,92 @@ export const createGymSetZustand = (set: any, get: any) => ({
                                 },
                             };
                         }
-                        return sup;
+                    } else {
+                        // Otherwise find the exercise using findExercise
+                        const found = findExercise(items, itemId);
+                        if (found) {
+                            if (isGymExercise(found.exercise)) {
+                                const ge = found.exercise as GymExercise;
+                                const originalSets = ge.sets ?? [];
+                                const updatedSets = originalSets.map((s, idx) =>
+                                    idx === setIndex ? { ...s, rest: restTime } : s
+                                );
+                                found.parent[found.index] = {
+                                    ...ge,
+                                    sets: updatedSets,
+                                };
+                            } else if (isCardioExercise(found.exercise)) {
+                                const ce = found.exercise as CardioExercise;
+                                const originalIntervals = ce.intervals ?? [];
+                                const updatedIntervals = originalIntervals.map((interval, idx) =>
+                                    idx === setIndex ? { ...interval, rest: restTime } : interval
+                                );
+                                found.parent[found.index] = {
+                                    ...ce,
+                                    intervals: updatedIntervals,
+                                };
+                            }
+                        }
                     }
 
-                    if (isGymExercise(node)) {
-                        const ge = node as GymExercise;
-                        const originalSets = ge.sets ?? [];
-                        const updatedSets = originalSets.map((s, idx) =>
-                            idx === setIndex ? { ...s, rest: restTime } : s
-                        );
-                        return {
-                            ...ge,
-                            sets: updatedSets,
+                    const updatedStaging = {
+                        ...currentStaging,
+                        layout: items
+                    };
+                    newStagingLayouts.set(layoutId, updatedStaging);
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
+            // Otherwise update persisted version directly
+            const layouts = state.layouts.map((layout: Layout) => {
+                if (layout.id !== layoutId) return layout;
+
+                const items = [...layout.layout];
+                
+                // First check if itemId is a superset
+                const supersetIndex = items.findIndex(item => isSuperSet(item) && item.id === itemId);
+                if (supersetIndex !== -1) {
+                    const sup = items[supersetIndex] as SuperSet;
+                    if (sup.settings.supersetType === 'circuit') {
+                        items[supersetIndex] = {
+                            ...sup,
+                            restLength: restTime,
+                            settings: {
+                                ...sup.settings,
+                                noRest: sup.settings.noRest,
+                            },
                         };
                     }
-
-                    if (isCardioExercise(node)) {
-                        const ce = node as CardioExercise;
-                        const originalIntervals = ce.intervals ?? [];
-                        const updatedIntervals = originalIntervals.map((interval, idx) =>
-                            idx === setIndex ? { ...interval, rest: restTime } : interval
-                        );
-                        return {
-                            ...ce,
-                            intervals: updatedIntervals,
-                        };
+                } else {
+                    // Otherwise find the exercise using findExercise
+                    const found = findExercise(items, itemId);
+                    if (found) {
+                        if (isGymExercise(found.exercise)) {
+                            const ge = found.exercise as GymExercise;
+                            const originalSets = ge.sets ?? [];
+                            const updatedSets = originalSets.map((s, idx) =>
+                                idx === setIndex ? { ...s, rest: restTime } : s
+                            );
+                            found.parent[found.index] = {
+                                ...ge,
+                                sets: updatedSets,
+                            };
+                        } else if (isCardioExercise(found.exercise)) {
+                            const ce = found.exercise as CardioExercise;
+                            const originalIntervals = ce.intervals ?? [];
+                            const updatedIntervals = originalIntervals.map((interval, idx) =>
+                                idx === setIndex ? { ...interval, rest: restTime } : interval
+                            );
+                            found.parent[found.index] = {
+                                ...ce,
+                                intervals: updatedIntervals,
+                            };
+                        }
                     }
+                }
 
-                    return node;
-                });
-
-                return { ...layout, layout: newLayout };
+                return { ...layout, layout: items };
             });
             storage?.set("layouts", JSON.stringify(layouts));
             return { layouts };
@@ -73,15 +134,20 @@ export const createGymSetZustand = (set: any, get: any) => ({
             const setIndex = restStatus.index;
             const restTime = rest;
 
-            const updatedLayouts = layouts.map((layout: Layout) => {
-                if (layout.id !== layoutId) return layout;
-
-                const newLayout = findAndUpdate(layout.layout, restStatus.id, node => {
-                    if (isSuperSet(node)) {
-                        const sup = node as SuperSet;
-
+            // Staging-aware: If layout is being edited, update staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId) as Layout | undefined;
+                
+                if (currentStaging && currentStaging.layout) {
+                    const items = [...currentStaging.layout];
+                    
+                    // First check if restStatus.id is a superset
+                    const supersetIndex = items.findIndex(item => isSuperSet(item) && item.id === restStatus.id);
+                    if (supersetIndex !== -1) {
+                        const sup = items[supersetIndex] as SuperSet;
                         if (sup.settings.supersetType === "circuit") {
-                            return {
+                            items[supersetIndex] = {
                                 ...sup,
                                 layout: sup.layout.map(child => {
                                     if (!isGymExercise(child)) return child;
@@ -95,39 +161,100 @@ export const createGymSetZustand = (set: any, get: any) => ({
                                 }),
                             };
                         }
-
-                        return sup;
+                    } else {
+                        // Otherwise find the exercise using findExercise
+                        const found = findExercise(items, restStatus.id);
+                        if (found) {
+                            if (isGymExercise(found.exercise)) {
+                                const ge = found.exercise as GymExercise;
+                                const originalSets = ge.sets ?? [];
+                                const updatedSets = originalSets.map((s, idx) =>
+                                    idx === setIndex ? { ...s, rest: restTime } : s
+                                );
+                                found.parent[found.index] = {
+                                    ...ge,
+                                    sets: updatedSets,
+                                };
+                            } else if (isCardioExercise(found.exercise)) {
+                                const ce = found.exercise as CardioExercise;
+                                const originalIntervals = ce.intervals ?? [];
+                                const updatedIntervals = originalIntervals.map((interval, idx) =>
+                                    idx === setIndex ? { ...interval, rest: restTime } : interval
+                                );
+                                found.parent[found.index] = {
+                                    ...ce,
+                                    intervals: updatedIntervals,
+                                };
+                            }
+                        }
                     }
 
-                    if (isGymExercise(node)) {
-                        const ge = node as GymExercise;
-                        const originalSets = ge.sets ?? [];
-                        const updatedSets = originalSets.map((s, idx) =>
-                            idx === setIndex ? { ...s, rest: restTime } : s
-                        );
+                    const updatedStaging = {
+                        ...currentStaging,
+                        layout: items
+                    };
+                    newStagingLayouts.set(layoutId, updatedStaging);
+                    return { 
+                        stagingLayouts: newStagingLayouts,
+                        restStatus: { id: "stopped", index: -1 }
+                    };
+                }
+            }
 
-                        return {
-                            ...ge,
-                            sets: updatedSets,
+            // Otherwise update persisted version directly
+            const updatedLayouts = layouts.map((layout: Layout) => {
+                if (layout.id !== layoutId) return layout;
+
+                const items = [...layout.layout];
+                
+                // First check if restStatus.id is a superset
+                const supersetIndex = items.findIndex(item => isSuperSet(item) && item.id === restStatus.id);
+                if (supersetIndex !== -1) {
+                    const sup = items[supersetIndex] as SuperSet;
+                    if (sup.settings.supersetType === "circuit") {
+                        items[supersetIndex] = {
+                            ...sup,
+                            layout: sup.layout.map(child => {
+                                if (!isGymExercise(child)) return child;
+
+                                const originalSets = child.sets ?? [];
+                                const updatedSets = originalSets.map((s, idx) =>
+                                    idx === setIndex ? { ...s, rest: restTime } : s
+                                );
+
+                                return { ...child, sets: updatedSets };
+                            }),
                         };
                     }
-
-                    if (isCardioExercise(node)) {
-                        const ce = node as CardioExercise;
-                        const originalIntervals = ce.intervals ?? [];
-                        const updatedIntervals = originalIntervals.map((interval, idx) =>
-                            idx === setIndex ? { ...interval, rest: restTime } : interval
-                        );
-                        return {
-                            ...ce,
-                            intervals: updatedIntervals,
-                        };
+                } else {
+                    // Otherwise find the exercise using findExercise
+                    const found = findExercise(items, restStatus.id);
+                    if (found) {
+                        if (isGymExercise(found.exercise)) {
+                            const ge = found.exercise as GymExercise;
+                            const originalSets = ge.sets ?? [];
+                            const updatedSets = originalSets.map((s, idx) =>
+                                idx === setIndex ? { ...s, rest: restTime } : s
+                            );
+                            found.parent[found.index] = {
+                                ...ge,
+                                sets: updatedSets,
+                            };
+                        } else if (isCardioExercise(found.exercise)) {
+                            const ce = found.exercise as CardioExercise;
+                            const originalIntervals = ce.intervals ?? [];
+                            const updatedIntervals = originalIntervals.map((interval, idx) =>
+                                idx === setIndex ? { ...interval, rest: restTime } : interval
+                            );
+                            found.parent[found.index] = {
+                                ...ce,
+                                intervals: updatedIntervals,
+                            };
+                        }
                     }
+                }
 
-                    return node;
-                });
-
-                return { ...layout, layout: newLayout };
+                return { ...layout, layout: items };
             });
 
             storage?.set("layouts", JSON.stringify(updatedLayouts));
@@ -154,6 +281,24 @@ export const createGymSetZustand = (set: any, get: any) => ({
         restTime: number
     ) => {
         set((state: any) => {
+            // Staging-aware: If layout is being edited, update staging version
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId) as Layout | undefined;
+                
+                if (currentStaging && currentStaging.layout) {
+                    const newLayoutItems = findAndUpdate(currentStaging.layout, itemId, node => ({
+                        ...node,
+                        restLength: restTime,
+                    }));
+                    
+                    const updatedStaging = { ...currentStaging, layout: newLayoutItems };
+                    newStagingLayouts.set(layoutId, updatedStaging);
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
+            // Otherwise update persisted version directly (for backward compatibility)
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
 

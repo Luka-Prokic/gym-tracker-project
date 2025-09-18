@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import { useRoutine } from "../../../components/context/RoutineZustand";
-import IButton from "../../../components/buttons/IButton";
 import { useTheme } from "../../../components/context/ThemeContext";
 import Colors, { Themes } from "../../../constants/Colors";
 import { SCREEN_HEIGHT } from "../../../constants/ScreenWidth";
 import CardWrapper from "../../../components/bubbles/CardWrapper";
-import HR from "../../../components/mis/HR";
 import ExerciseBar from "../../../components/gym/ExerciseBar";
 import { useExerciseLayout } from "../../../components/context/ExerciseLayoutZustand";
 
@@ -18,41 +16,44 @@ export default function GymScreen() {
         activeRoutine,
         startTimer
     } = useRoutine();
-    const { layouts, getLayout } = useExerciseLayout();
+    const layouts = useExerciseLayout();
 
     if (!layouts)
         return null;
-    startTimer();
 
     const [visible, setVisible] = useState<boolean>(true);
+
+    useEffect(() => {
+        startTimer();
+    }, []);
 
     const handleCancel = () => {
         setTimeout(() => clearActiveRoutine(), 100);
         setVisible(false);
-        if (activeRoutine.status === "saved")
+        if (activeRoutine.status === "routine")
             updateRoutine(activeRoutine.id, activeRoutine);
     };
 
     const handleDiscard = () => {
-        updateRoutine(activeRoutine.id, { ...activeRoutine, status: "temp" });
+        updateRoutine(activeRoutine.id, { ...activeRoutine, status: "template" });
         handleCancel();
         // removeLayout(activeRoutine.layoutId);
     };
 
     const handleFinish = () => {
+        updateRoutine(activeRoutine.id, { ...activeRoutine, isFinished: true });
         saveIt(activeRoutine.id);
-        updateRoutine(activeRoutine.id, { ...activeRoutine, status: "saved" });
         handleCancel();
     };
 
     const handleSaveRoutine = () => {
         saveIt(activeRoutine.id);
-        updateRoutine(activeRoutine.id, { ...activeRoutine, status: "saved" });
+        updateRoutine(activeRoutine.id, { ...activeRoutine, status: "routine" });
 
     };
 
     const handleUpdateRoutine = () => {
-        if (activeRoutine.status === "saved") {
+        if (activeRoutine.status === "routine") {
             updateRoutine(activeRoutine.id, activeRoutine);
             saveIt(activeRoutine.id);
         }
@@ -66,30 +67,30 @@ export default function GymScreen() {
     }, [activeRoutine]);
 
     return (
-        <CardWrapper visible={visible} onClose={handleUpdateRoutine}>
-            <View style={[styles.container, { height: SCREEN_HEIGHT, backgroundColor: color.background }]}>
+        <ScrollView 
+            style={[styles.container, { flex: 1, backgroundColor: color.background }]} 
+            contentContainerStyle={{ flexGrow: 1, alignItems: 'center' }}
+            showsVerticalScrollIndicator={false}
+        >
+            <CardWrapper visible={visible} onClose={handleUpdateRoutine}>
 
                 <ExerciseBar />
 
                 {/* {getLayout(activeRoutine.layoutId)?.layout.length ? <HR width={"90%"} /> : null}
 
-                <View style={styles.bottom}>
-                    <IButton color={color.error} textColor={color.secondaryText} width={"48%"} height={44} title="Cancel" onPress={handleDiscard} />
-                    {getLayout(activeRoutine.layoutId)?.layout.length ? <IButton color={color.fourthBackground} textColor={color.secondaryText} width={"48%"} height={44} title="Finish" onPress={handleFinish} /> : null}
-                </View> */}
-            </View>
-        </CardWrapper >
+                    <View style={styles.bottom}>
+                        <IButton color={color.error} textColor={color.secondaryText} width={"48%"} height={44} title="Cancel" onPress={handleDiscard} />
+                        {getLayout(activeRoutine.layoutId)?.layout.length ? <IButton color={color.fourthBackground} textColor={color.secondaryText} width={"48%"} height={44} title="Finish" onPress={handleFinish} /> : null}
+                    </View> */}
+            </CardWrapper >
+        </ScrollView >
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "flex-start",
-        alignItems: "center",
-        userSelect: "none",
-        gap: 16,
-        paddingBottom: 88,
+        width: '100%',
     },
     title: {
         fontSize: 24,

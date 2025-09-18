@@ -3,7 +3,7 @@ import { useRoutine } from "../../../components/context/RoutineZustand";
 import IButton from "../../../components/buttons/IButton";
 import { useTheme } from "../../../components/context/ThemeContext";
 import Colors, { Themes } from "../../../constants/Colors";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { useExerciseLayout } from "@/components/context/ExerciseLayoutZustand";
 import { Ionicons } from "@expo/vector-icons";
 import useFadeInAnim from "@/assets/animations/useFadeInAnim";
@@ -13,25 +13,25 @@ export default function FinishRoutineButton() {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const {
-        updateRoutine, clearActiveRoutine, saveIt,
+        updateRoutine, clearActiveRoutineOnly, saveIt,
         activeRoutine,
     } = useRoutine();
     const { getLayout } = useExerciseLayout();
-    const navigation = useNavigation();
     const { fadeIn } = useFadeInAnim();
 
     const handleCancel = () => {
-        setTimeout(() => clearActiveRoutine(), 100);
-        if (activeRoutine.status === "saved")
+        setTimeout(() => clearActiveRoutineOnly(), 100);
+        if (activeRoutine.status === "routine")
             updateRoutine(activeRoutine.id, activeRoutine);
 
-        navigation.goBack();
+        router.back();
     };
 
     const handleFinish = () => {
+        updateRoutine(activeRoutine.id, { ...activeRoutine, isFinished: true });
         saveIt(activeRoutine.id);
-        updateRoutine(activeRoutine.id, { ...activeRoutine, status: "saved" });
-        handleCancel();
+        setTimeout(() => clearActiveRoutineOnly(), 100);
+        router.back();
     };
 
     return (

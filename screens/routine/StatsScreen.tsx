@@ -1,41 +1,31 @@
-import React from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, View } from 'react-native';
 import { useTheme } from '../../components/context/ThemeContext';
 import Colors, { Themes } from '../../constants/Colors';
-import ModalWrapper from '../../components/bubbles/ModalWrapper';
-import { SCREEN_HEIGHT } from '../../constants/ScreenWidth';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CorruptParamList } from '../../assets/types';
-import { useNavigation } from '@react-navigation/native';
-import CardWrapper from '@/components/bubbles/CardWrapper';
 
 export default function StatsScreen() {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
-    const navigation = useNavigation<NativeStackNavigationProp<CorruptParamList, "Routines">>();
-
 
     return (
-        <CardWrapper>
+        <View style={[styles.container, { backgroundColor: color.background }]}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={[styles.blur, styles.scroller]}
+                style={styles.scroller}
             >
-
+                {/* Stats content will go here */}
             </ScrollView>
-        </CardWrapper>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    blur: {
-        backdropFilter: 'blur(30px)',
+    container: {
+        flex: 1,
     },
     scroller: {
-        paddingBottom: 88,
-        paddingTop: 44,
-        width: "100%",
-        height: SCREEN_HEIGHT,
+        flex: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
     },
     text: {
         fontSize: 14,

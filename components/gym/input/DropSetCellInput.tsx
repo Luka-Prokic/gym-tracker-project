@@ -7,6 +7,7 @@ import { View } from "react-native";
 import { DropSets, Sets } from "@/components/context/ExerciseZustand";
 import GymTableInput from "../gym_table/GymTableInput";
 import { useUser } from "@/components/context/UserZustend";
+import { useDisplayedWeight } from "@/components/context/user/hooks/filters";
 
 interface DropSetCellInputProps {
     exerciseId: GymExercise["id"];
@@ -24,6 +25,7 @@ const DropSetCellInput: React.FC<DropSetCellInputProps> = ({ exerciseId, setInde
     const { layoutId } = useGymActions(exerciseId);
     const { updateDropColumn } = useExerciseLayout();
     const { settings } = useUser();
+    const { fromKg, toKg } = useDisplayedWeight();
 
     const weightUnit = settings.units.weight;
 
@@ -37,7 +39,7 @@ const DropSetCellInput: React.FC<DropSetCellInputProps> = ({ exerciseId, setInde
         >
             <GymTableInput
                 column={column}
-                value={dropSet[column]}
+                value={column === "kg" ? fromKg(dropSet[column] as number) : dropSet[column]}
                 text={color.secondaryText}
                 height={34}
                 onChange={(inputValue) =>
@@ -47,7 +49,7 @@ const DropSetCellInput: React.FC<DropSetCellInputProps> = ({ exerciseId, setInde
                         setIndex,
                         dropSetIndex,
                         column,
-                        inputValue
+                        column === "kg" ? toKg(inputValue) : inputValue
                     )}
                 editable={disabled}
             />

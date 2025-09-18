@@ -10,6 +10,22 @@ export const createLabelsZustand = (set: any, get: any) => ({
         note: string
     ) => {
         set((state: any) => {
+            if (state.editingSessions.has(layoutId)) {
+                // Update staging version
+                const staged = state.stagingLayouts.get(layoutId);
+                if (!staged) return {};
+
+                const newLayout = findAndUpdate(staged.layout, itemId, node => ({
+                    ...node,
+                    note,
+                }));
+
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                newStagingLayouts.set(layoutId, { ...staged, layout: newLayout });
+
+                return { stagingLayouts: newStagingLayouts };
+            }
+
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
                 const newLayout = findAndUpdate(layout.layout, itemId, node => ({

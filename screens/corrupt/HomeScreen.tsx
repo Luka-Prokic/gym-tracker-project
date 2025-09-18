@@ -5,20 +5,14 @@ import { View, StyleSheet } from "react-native";
 import WidgetLayout from "./WidgetLayout";
 import HR from "../../components/mis/HR";
 import IButton from "../../components/buttons/IButton";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../assets/types";
-import { useNavigation } from "@react-navigation/native";
-
-
-type HomeNavigationProp = NativeStackNavigationProp<RootStackParamList, "Main">;
+import { router } from "expo-router";
 
 export default function HomeScreen() {
   const { theme, homeEditing, setHomeEditing } = useTheme();
   const color = Colors[theme as Themes];
-  const navigation = useNavigation<HomeNavigationProp>();
 
   const goToAll = () => {
-    navigation.navigate("Modals", { screen: "All" });
+    router.push("/modals/all");
   };
 
   if (homeEditing)

@@ -6,9 +6,7 @@ import Colors, { Themes } from "../../../constants/Colors";
 import ITimer from "../../timer/ITimer";
 import { View } from "react-native";
 import IButton from "../../buttons/IButton";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../../assets/types";
+import { router } from "expo-router";
 import { SettingsNavigationContext } from "../../context/SettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useUnifrakturCookFont } from "../../../assets/hooks/useUnifrakturCookFont";
@@ -25,7 +23,6 @@ const OldMainHeader: React.FC<ITrainingTopProps> = ({ width }) => {
     const flickerAnim = useRef(new Animated.Value(1)).current;
     const flickerActive = useRef(false);
 
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
     const { openModal } = useContext(SettingsNavigationContext);
 
 
@@ -109,7 +106,7 @@ const OldMainHeader: React.FC<ITrainingTopProps> = ({ width }) => {
 
             <IButton
                 onPress={() => {
-                    navigation.navigate("Settings", { screen: "Settings" });
+                    router.push("/settings");
                     openModal();
                 }}
                 height={44} width={44} style={styles.icon}

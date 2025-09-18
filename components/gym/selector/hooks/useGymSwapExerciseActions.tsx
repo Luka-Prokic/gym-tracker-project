@@ -3,7 +3,7 @@ import { BODYPART_LIST, BodypartType, EquipmentType, useExercise } from "@/compo
 import { useExerciseLayout } from "@/components/context/ExerciseLayoutZustand";
 import { Layout, GymExercise } from "@/components/context/ExerciseLayoutZustand";
 import { Exercise } from "@/components/context/ExerciseZustand";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 export type EquipmentFilterType = EquipmentType | "All Equipment";
 export type BodypartFilterType = BodypartType | "All Muscles";
@@ -11,7 +11,6 @@ export type BodypartFilterType = BodypartType | "All Muscles";
 export const useGymSwapExerciseActions = (layoutId: Layout["id"], exId: GymExercise["id"]) => {
     const { exercises, getExercise } = useExercise();
     const { swapExercise, getGymExercise } = useExerciseLayout();
-    const navigation = useNavigation();
 
     const [muscle, setMuscle] = useState<BodypartFilterType>("All Muscles");
     const [equipment, setEquipment] = useState<EquipmentFilterType>("All Equipment");
@@ -27,7 +26,7 @@ export const useGymSwapExerciseActions = (layoutId: Layout["id"], exId: GymExerc
         if (oldEx?.kind === ex.kind) {
             swapExercise(layoutId, exId, ex.id);
         }
-        navigation.goBack();
+        router.back();
     };
 
     const filteredExercisesList = exercises.filter((exercise) => {

@@ -3,39 +3,34 @@ import { ScrollView } from "react-native-gesture-handler";
 import ThemePicker from "../settings/app/ThemePicker";
 import Colors, { Themes } from "../../constants/Colors";
 import { useTheme } from "../../components/context/ThemeContext";
-import List from "../../components/containers/List"; ``
+import List from "../../components/containers/List";
 import SettingsButton from "../../components/buttons/SettingsButton";
 import { Ionicons } from "@expo/vector-icons";
 import CakaIcon from "../../components/mis/CakaIcon";
 import { StyleSheet, Text, View } from "react-native";
 import hexToRGBA from "../../assets/hooks/HEXtoRGB";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { SettingsParamList } from "../../assets/types";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { SCREEN_HEIGHT } from "../../constants/ScreenWidth";
-
-
-type SettingsNavigationProp = NativeStackNavigationProp<SettingsParamList, "Settings">;
 
 const SettingsScreen: React.FC = () => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
-    const navigation = useNavigation<SettingsNavigationProp>();
 
     return (
-        <>
+        <View style={{ flex: 1, backgroundColor: color.background }}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 style={{
                     paddingBottom: 88,
                     width: "100%",
                     minHeight: SCREEN_HEIGHT,
+                    backgroundColor: color.background,
                 }}
             >
 
                 <List background={hexToRGBA(color.handle, 0.8)} width={'90%'} hrStart="Custom">
                     <SettingsButton
-                        onPress={() => navigation.navigate('Account')}
+                        onPress={() => router.push('/settings/account')}
                         title={'Account'} height={54} arrow={true}
                         icon={<View style={{
                             width: 34,
@@ -52,12 +47,12 @@ const SettingsScreen: React.FC = () => {
 
                 <List background={hexToRGBA(color.handle, 0.8)} width={'90%'} hrStart="Custom">
                     <SettingsButton
-                        onPress={() => navigation.navigate('Notifications')}
+                        onPress={() => router.push('/settings/notifications')}
                         title={'Notifications'} height={34} arrow={true}
                         icon={<Ionicons name="notifications" size={18} color={color.text} />}
                     />
                     <SettingsButton
-                        onPress={() => navigation.navigate('Privacy')}
+                        onPress={() => router.push('/settings/privacy')}
                         title={'Privicy & Protection'} height={34} arrow={true}
                         icon={<Ionicons name="lock-closed" size={18} color={color.text} />}
                     />
@@ -66,22 +61,22 @@ const SettingsScreen: React.FC = () => {
 
                 <List background={hexToRGBA(color.handle, 0.8)} width={'90%'} hrStart="Custom">
                     <SettingsButton
-                        onPress={() => navigation.navigate('Measurements')}
+                        onPress={() => router.push('/settings/measurements')}
                         title={'Measurements'} height={34} arrow={true}
                         icon={<Ionicons name="scale" size={18} color={color.text} />}
                     />
                     <SettingsButton
-                        onPress={() => navigation.navigate('Units')}
+                        onPress={() => router.push('/settings/units')}
                         title={'Units'} height={34} arrow={true}
                         icon={<Ionicons name="globe" size={18} color={color.text} />}
                     />
                     <SettingsButton
-                        onPress={() => navigation.navigate('Goals')}
+                        onPress={() => router.push('/settings/goals')}
                         title={'Goals'} height={34} arrow={true}
                         icon={<Ionicons name="calendar" size={18} color={color.text} />}
                     />
                     <SettingsButton
-                        onPress={() => navigation.navigate('Awards')}
+                        onPress={() => router.push('/settings/awards')}
                         title={'Awards'} height={34} arrow={true}
                         icon={<Ionicons name="trophy" size={18} color={color.text} />}
                     />
@@ -106,8 +101,7 @@ const SettingsScreen: React.FC = () => {
                 </List>
 
             </ScrollView>
-        </>
-
+        </View>
     );
 };
 

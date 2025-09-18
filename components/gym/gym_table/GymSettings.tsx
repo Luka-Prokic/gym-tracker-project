@@ -5,9 +5,7 @@ import Colors, { Themes } from "../../../constants/Colors";
 import { useTheme } from "../../context/ThemeContext";
 import useGymActions from "../hooks/useGymActions";
 import { GymExercise, useExerciseLayout } from "../../context/ExerciseLayoutZustand";
-import { RootStackParamList } from "@/assets/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 interface GymSettingsBubbleProps {
     exerciseId: GymExercise["id"];
@@ -19,7 +17,6 @@ const GymSettings: React.FC<GymSettingsBubbleProps> = ({ exerciseId, onClose }) 
     const color = Colors[theme as Themes];
     const { layoutId, exercise } = useGymActions(exerciseId);
     const { removeGymExercise, updateGymExerciseSettings } = useExerciseLayout();
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
     if (!exercise)
         return null;
@@ -43,12 +40,12 @@ const GymSettings: React.FC<GymSettingsBubbleProps> = ({ exerciseId, onClose }) 
             <OptionButton title={"Add Superset Excercise"} color={color.accent} icon={<Ionicons name="add-circle" color={color.accent} size={24} />}
                 onPress={() => {
                     onClose();
-                    navigation.navigate("Modals", { screen: "SuperSet", params: { layoutId: layoutId, exId: exerciseId } });
+                    router.push(`/modals/superSet?layoutId=${layoutId}&exId=${exerciseId}`);
                 }} />
             <OptionButton title={"Change Excercise"} color={color.text} icon={<Ionicons name="sync-circle" color={color.text} size={24} />}
                 onPress={() => {
                     onClose();
-                    navigation.navigate("Modals", { screen: "SwapExercise", params: { layoutId: layoutId, exId: exerciseId } });
+                    router.push(`/modals/swapExercise?layoutId=${layoutId}&exId=${exerciseId}`);
                 }} />
 
 

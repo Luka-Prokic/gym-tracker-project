@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BodypartType, EquipmentType, useExercise, Exercise } from "@/components/context/ExerciseZustand";
 import { useExerciseLayout, Layout, SuperSet } from "@/components/context/ExerciseLayoutZustand";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 export type EquipmentFilterType = EquipmentType | "All Equipment";
 export type BodypartFilterType = BodypartType | "All Muscles";
@@ -12,7 +12,6 @@ export const useGymSuperSetActions = (layoutId: Layout["id"], exId?: string, sup
         addGymExercise, getSuperSet, getGymExercise, addToSuperSet,
         createSuperSet, removeFromSuperSet, removeSuperSet, addCardioExercise
     } = useExerciseLayout();
-    const navigation = useNavigation();
 
     const [muscle, setMuscle] = useState<BodypartFilterType>("All Muscles");
     const [equipment, setEquipment] = useState<EquipmentFilterType>("All Equipment");
@@ -101,7 +100,7 @@ export const useGymSuperSetActions = (layoutId: Layout["id"], exId?: string, sup
                 removeSuperSet(layoutId, supersetId);
         }
 
-        navigation.goBack();
+        router.back();
     };
 
 

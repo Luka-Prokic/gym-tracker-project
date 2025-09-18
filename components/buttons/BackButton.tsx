@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, Animated, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Colors, { Themes } from "../../constants/Colors";
 import { useTheme } from "../../components/context/ThemeContext";
@@ -12,7 +12,6 @@ interface IBackButton {
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 const BackButton: React.FC<IBackButton> = ({ color }) => {
-    const navigation = useNavigation();
     const { theme } = useTheme();
     const colors = Colors[theme as Themes];
 
@@ -28,7 +27,7 @@ const BackButton: React.FC<IBackButton> = ({ color }) => {
 
     return (
         <AnimatedTouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
             style={[styles.backButton, { opacity: fadeAnim }]}
             hitSlop={styles.hitSlop}
         >

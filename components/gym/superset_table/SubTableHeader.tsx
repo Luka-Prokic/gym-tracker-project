@@ -15,9 +15,10 @@ import { useRoutine } from "@/components/context/RoutineZustand";
 interface SubTableHeaderProps {
     exerciseId: GymExercise["id"];
     supersetId: SuperSet["id"];
+    readOnly?: boolean;
 };
 
-const SubTableHeader: React.FC<SubTableHeaderProps> = ({ exerciseId, supersetId }) => {
+const SubTableHeader: React.FC<SubTableHeaderProps> = ({ exerciseId, supersetId, readOnly }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const { settingsVisible, closeSettings, openSettings, exercise, exerciseName } = useGymActions(exerciseId);
@@ -55,9 +56,9 @@ const SubTableHeader: React.FC<SubTableHeaderProps> = ({ exerciseId, supersetId 
 
             <View style={[styles.top]} >
 
-                <RestSettings exerciseId={exerciseId} disabled={mode === "circuit"} />
+                {!readOnly && <RestSettings exerciseId={exerciseId} disabled={mode === "circuit"} />}
 
-                <IButton
+                {!readOnly && <IButton
                     height={22} width={44}
                     style={styles.button}
                     onPress={openSettings}
@@ -69,7 +70,7 @@ const SubTableHeader: React.FC<SubTableHeaderProps> = ({ exerciseId, supersetId 
                             Edit
                         </Text>
                     </View>
-                </IButton>
+                </IButton>}
             </View >
 
 

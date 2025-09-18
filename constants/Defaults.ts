@@ -37,8 +37,9 @@ export const defaultRoutine: RoutineLayout = {
     layoutId: defaultGymLayout.id,
     timer: 0,
     lastStartTime: Date.now(),
-    status: "temp",
+    status: "template",
     type: "gym",
+    isFinished: false,
 };
 
 export const defaultSet: Sets = { kg: 0, reps: 0, rir: 0, rpe: 1, rest: 0, dropSets: [] };

@@ -1,15 +1,19 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
-import BackButton from "../../components/buttons/BackButton";
+import { View, StyleSheet, Text } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 import Colors, { Themes } from "../../constants/Colors";
-import { NativeStackHeaderProps } from "@react-navigation/native-stack";
+import { router } from "expo-router";
+import IButton from "../buttons/IButton";
+import { Ionicons } from "@expo/vector-icons";
 
-interface ITopBarProps extends NativeStackHeaderProps {
+interface ITopBarProps {
+    title?: string;
     children?: React.ReactNode;
+    headerLeft?: () => React.ReactNode;
+    headerRight?: () => React.ReactNode;
 }
 
-const ITopBar: React.FC<ITopBarProps> = ({ children, options }) => {
+const ITopBar: React.FC<ITopBarProps> = ({ title, children, headerLeft, headerRight }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
 
@@ -22,22 +26,26 @@ const ITopBar: React.FC<ITopBarProps> = ({ children, options }) => {
         Corrupted: "rgba(100, 255, 255, 0.2)",
     }[theme as Themes];
 
-
     return (
         <View style={[styles.container, { backgroundColor }]}>
             <View style={[styles.leftContainer]}>
-                {options.headerLeft ? null : (
-                    <BackButton />
+                {headerLeft ? headerLeft() : (
+                    <IButton width={34} height={34} onPress={() => router.back()}>
+                        <Ionicons name="chevron-back" size={24} color={color.text} />
+                    </IButton>
                 )}
             </View>
-            <View style={styles.center}>{children}</View>
-            <View style={styles.rightContainer}
-            >
-                {options.headerRight ? options.headerRight({ tintColor: color.text }) :
-                    <></>
-                }
+            <View style={styles.center}>
+                {children || (title && (
+                    <Text style={[styles.title, { color: color.text }]}>
+                        {title}
+                    </Text>
+                ))}
             </View>
-        </View >
+            <View style={styles.rightContainer}>
+                {headerRight ? headerRight() : <></>}
+            </View>
+        </View>
     );
 };
 
@@ -72,6 +80,11 @@ const styles = StyleSheet.create({
         alignItems: "flex-end",
         position: "absolute",
         right: 0
+    },
+    title: {
+        fontSize: 17,
+        fontWeight: '600',
+        textAlign: 'center',
     },
 });
 

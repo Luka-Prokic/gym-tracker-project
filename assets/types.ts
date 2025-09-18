@@ -13,6 +13,7 @@ export type ModalParamList = {
     AddExercise: { layoutId: Layout["id"] };
     SwapExercise: { layoutId: Layout["id"], exId: GymExercise["id"] };
     SuperSet: { layoutId: Layout["id"], exId?: GymExercise["id"], superSetId?: SuperSet["id"] };
+    WorkoutRecap: { routineId: string; layoutId: string };
 };
 
 export type CorruptParamList = {

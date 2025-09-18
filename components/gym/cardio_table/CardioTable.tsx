@@ -17,6 +17,7 @@ import SubRow from "./SubRow";
 interface CardioTableProps {
     exerciseId: CardioExercise["id"];
     supersetId?: SuperSet["id"];
+    readOnly?: boolean;
 }
 
 export const CardioTable: React.FC<CardioTableProps> = ({ exerciseId, supersetId }) => {

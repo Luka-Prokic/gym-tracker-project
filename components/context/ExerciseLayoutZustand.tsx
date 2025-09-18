@@ -111,6 +111,7 @@ export type LayoutItem = GymExercise | SuperSet | CardioExercise;
 
 export interface Layout {
     id: string;
+    name?: string;
     layout: LayoutItem[];
 }
 

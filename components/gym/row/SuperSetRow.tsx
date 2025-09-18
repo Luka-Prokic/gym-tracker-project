@@ -1,6 +1,7 @@
 import { Pressable, Swipeable } from "react-native-gesture-handler";
 import useGymActions from "../hooks/useGymActions";
 import { useExerciseLayout, GymExercise, SuperSet } from "../../context/ExerciseLayoutZustand";
+import { useRoutine } from "../../context/RoutineZustand";
 import { StyleSheet } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 import Colors, { Themes } from "../../../constants/Colors";
@@ -22,14 +23,16 @@ interface SuperSetRowGymRowProps {
     index: any;
     set: Sets;
     startRest: () => void;
+    readOnly?: boolean;
 };
 
 
-const SuperSetRow: React.FC<SuperSetRowGymRowProps> = ({ exerciseId, supersetId, index, set }) => {
+const SuperSetRow: React.FC<SuperSetRowGymRowProps> = ({ exerciseId, supersetId, index, set, readOnly }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
-    const { columns, exercise, settingsVisible, openSettings, closeSettings } = useGymActions(exerciseId);
-    const { restStatus } = useExerciseLayout();
+    const { columns, exercise, settingsVisible, openSettings, closeSettings, layoutId } = useGymActions(exerciseId);
+    const { restStatus, isEditingLayout } = useExerciseLayout();
+    const { activeRoutine } = useRoutine();
 
     if (!exercise || !set)
         return null;
@@ -54,9 +57,10 @@ const SuperSetRow: React.FC<SuperSetRowGymRowProps> = ({ exerciseId, supersetId,
     return (
         <Swipeable
             key={`swipe-${index}-${checked}`}
-            renderRightActions={() => renderRightActions()}
-            onSwipeableOpenStartDrag={openSettings}
-            onSwipeableClose={closeSettings}
+            renderRightActions={readOnly ? undefined : () => renderRightActions()}
+            onSwipeableOpenStartDrag={readOnly ? undefined : openSettings}
+            onSwipeableClose={readOnly ? undefined : closeSettings}
+            enabled={!readOnly}
         >
             <Pressable
                 key={index}
@@ -89,7 +93,7 @@ const SuperSetRow: React.FC<SuperSetRowGymRowProps> = ({ exerciseId, supersetId,
                                 supersetId={supersetId}
                                 index={index}
                                 set={set}
-                                disabled={restStatus.id !== "stopped" || settingsVisible}
+                                disabled={activeRoutine?.id?.startsWith("routine_edit_") || restStatus.id !== "stopped" || settingsVisible}
                             />
                         );
 

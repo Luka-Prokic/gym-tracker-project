@@ -11,7 +11,7 @@ import Overlay from "../containers/Overlay";
 export enum IBubbleSize {
     "xs" = 44,
     "small" = SCREEN_WIDTH * 0.3,
-    "medium" = SCREEN_WIDTH * 0.6,
+    "medium" = SCREEN_WIDTH * 0.5,
     "large" = SCREEN_WIDTH * 0.8,
     "xl" = SCREEN_WIDTH * 0.92,
 };

@@ -1,30 +1,112 @@
 import React from "react";
-import { ThemeProvider } from "../components/context/ThemeContext";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../assets/types";
-import TabNavigator from "./INavigation";
-import ModalNavigator from "./ModalNavigator";
+import { Stack, router } from "expo-router";
+import { StatusBar, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider, useTheme } from "../components/context/ThemeContext";
 import { SettingsNavigationProvider } from "../components/context/SettingsContext";
-import SettingsModal from "../screens/settings/SettingsModal";
+import Colors, { Themes } from '../constants/Colors';
+import MainHeader from "../components/headers/main/MainHeader";
+import CancelRoutineButton from "../screens/routine/gym/CancelRoutineButton";
+import FinishRoutineButton from "../screens/routine/gym/FinishRoutineButton";
+import ITopBar from "../components/headers/ITopBar";
+import IButton from "../components/buttons/IButton";
+import { Ionicons } from "@expo/vector-icons";
 
-const RootStack = createNativeStackNavigator<RootStackParamList>();
+function RootLayoutContent() {
+    const { theme } = useTheme();
+    const color = Colors[theme as Themes];
 
-const Layout = () => {
+    const backgroundColor = {
+        light: '#FFFFFF',
+        peachy: '#FFFFFF',
+        oldschool: '#FFFEF6',
+        dark: '#1C1C1E',
+        preworkout: '#222222',
+        Corrupted: '#222222',
+    }[theme as Themes];
+
+    const barStyle = theme === 'dark' || theme === 'preworkout' || theme === 'Corrupted' ? 'light-content' : 'dark-content';
+
+    return (
+        <SafeAreaProvider>
+            <StatusBar barStyle={barStyle} backgroundColor={backgroundColor} />
+            <View style={{ flex: 1, backgroundColor: color.background }}>
+                <Stack>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen
+                        name="routine"
+                        options={{
+                            presentation: "card",
+                            headerShown: true,
+                            header: () => <MainHeader
+                                navigation={{} as any}
+                                route={{ name: 'routine' } as any}
+                                options={{
+                                    headerLeft: () => <CancelRoutineButton />,
+                                    headerRight: () => <FinishRoutineButton />
+                                }}
+                                scrollY={0}
+                            />
+                        }}
+                    />
+                    <Stack.Screen
+                        name="routines"
+                        options={{
+                            presentation: "modal",
+                            header: () => {
+                                const currentColor = Colors[theme as Themes];
+                                return <ITopBar
+                                    title=""
+                                    headerLeft={() => <></>}
+                                    headerRight={() => (
+                                        <IButton width={34} height={34} onPress={() => router.back()}>
+                                            <Ionicons name="close" size={24} color={currentColor.text} />
+                                        </IButton>
+                                    )}
+                                />
+                            }
+                        }}
+                    />
+                    <Stack.Screen
+                        name="stats"
+                        options={{
+                            presentation: "card",
+                            headerShown: true,
+                            header: () => <MainHeader
+                                navigation={{} as any}
+                                route={{ name: 'stats' } as any}
+                                options={{
+                                    headerLeft: () => <></>
+                                }}
+                                scrollY={0}
+                            />
+                        }}
+                    />
+                    <Stack.Screen
+                        name="settings"
+                        options={{
+                            presentation: "modal",
+                            headerShown: false
+                        }}
+                    />
+                    <Stack.Screen
+                        name="modals"
+                        options={{
+                            headerShown: false
+                        }}
+                    />
+                </Stack>
+            </View>
+        </SafeAreaProvider>
+    );
+}
+
+export default function RootLayout() {
     return (
         <SettingsNavigationProvider>
             <ThemeProvider>
-                <RootStack.Navigator
-                    screenOptions={{ headerShown: false }}
-                    initialRouteName="Main"
-                >
-                    <RootStack.Screen name="Main" component={TabNavigator} />
-                    <RootStack.Screen name="Modals" component={ModalNavigator} />
-                    <RootStack.Screen name="Settings" component={SettingsModal}
-                        options={{ presentation: "modal" }} />
-                </RootStack.Navigator>
+                <RootLayoutContent />
             </ThemeProvider>
         </SettingsNavigationProvider>
     );
-};
-
-export default Layout;
+}

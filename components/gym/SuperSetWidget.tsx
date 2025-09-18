@@ -9,7 +9,6 @@ import useBubbleLayout from "../bubbles/hooks/useBubbleLayout";
 import useExerciseActions from "./hooks/useExerciseActions";
 import { Layout, LayoutItem, useExerciseLayout } from "../context/ExerciseLayoutZustand";
 import getInitials from "@/assets/hooks/getInitials";
-import { useExercise } from "../context/ExerciseZustand";
 
 export const getBackgroundById = (id: string, theme: Themes) => {
     const colorSet = [

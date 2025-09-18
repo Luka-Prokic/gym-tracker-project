@@ -6,10 +6,12 @@ import {
     PanResponder,
     Dimensions,
     Platform,
+    View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { useTheme } from "../context/ThemeContext";
 import { Themes } from "../../constants/Colors";
+import Colors from "../../constants/Colors";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -18,22 +20,32 @@ type ModalWrapperProps = {
     onClose?: () => void;
     children: React.ReactNode;
     color?: string;
+    showHeader?: boolean;
+    headerComponent?: React.ReactNode;
 };
 
-const ModalWrapper: React.FC<ModalWrapperProps> = ({ visible = true, onClose, children, color }) => {
+const ModalWrapper: React.FC<ModalWrapperProps> = ({
+    visible = true,
+    onClose,
+    children,
+    color,
+    showHeader = false,
+    headerComponent
+}) => {
     const translateY = useRef(new Animated.Value(screenHeight)).current;
     const [modalHeight, setModalH] = useState(screenHeight);
     const [isOpen, setIsOpen] = useState(visible);
-    const navigation = useNavigation();
     const { theme } = useTheme();
+    const colorScheme = Colors[theme as Themes];
 
-    const backgroundColor = {
-        light: "rgba(225, 225, 225, 0.4)",
-        peachy: "rgba(210, 200, 170, 0.4)",
-        oldschool: "rgba(210, 200, 180, 0.4)",
-        dark: "rgba(100, 100, 100, 0.4)",
-        preworkout: "rgba(255, 250, 240, 0.4)",
-        Corrupted: "rgba(100, 255, 255, 0.4)",
+    const backgroundColor = color || colorScheme.background;
+    const overlayColor = {
+        light: "rgba(0, 0, 0, 0.4)",
+        peachy: "rgba(0, 0, 0, 0.4)",
+        oldschool: "rgba(0, 0, 0, 0.4)",
+        dark: "rgba(0, 0, 0, 0.6)",
+        preworkout: "rgba(0, 0, 0, 0.6)",
+        Corrupted: "rgba(0, 0, 0, 0.6)",
     }[theme as Themes];
 
     useEffect(() => {
@@ -55,7 +67,7 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({ visible = true, onClose, ch
 
     const closeSheet = () => {
         setIsOpen(false);
-        navigation.goBack();
+        router.back();
         if (onClose) onClose();
         Animated.timing(translateY, {
             toValue: screenHeight,
@@ -90,19 +102,22 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({ visible = true, onClose, ch
 
     if (Platform.OS === "web") {
         return (
-            <Modal visible={visible} transparent={true} animationType="none" onRequestClose={onClose}
-                style={{ width: "100%", height: "100%" }}>
-                <Animated.View
-                    style={[styles.bottomSheet, {
-                        transform: [{ translateY }],
-                        backgroundColor: color || backgroundColor,
-                        backdropFilter: "blur(10px)",
-                    }]}
-                    {...panResponder.panHandlers}
-                >
+            <Animated.View
+                style={[styles.modal, {
+                    transform: [{ translateY }],
+                    backgroundColor: backgroundColor,
+                }]}
+                {...panResponder.panHandlers}
+            >
+                {showHeader && headerComponent && (
+                    <View style={styles.headerContainer}>
+                        {headerComponent}
+                    </View>
+                )}
+                <View style={styles.content}>
                     {children}
-                </Animated.View>
-            </Modal>
+                </View>
+            </Animated.View>
         );
     }
 
@@ -110,11 +125,30 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({ visible = true, onClose, ch
 };
 
 const styles = StyleSheet.create({
-    bottomSheet: {
+    overlay: {
+        flex: 1,
+        width: "100%",
+        height: "100%",
+    },
+    modal: {
+        position: "absolute",
         bottom: 0,
+        left: 0,
+        right: 0,
+        width: "100%",
+        minHeight: "50%",
+        maxHeight: "90%",
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
-        width: "100%",
+        zIndex: 1,
+    },
+    headerContainer: {
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        overflow: 'hidden',
+    },
+    content: {
+        flex: 1,
     },
 });
 

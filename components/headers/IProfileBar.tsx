@@ -3,9 +3,7 @@ import { View, StyleSheet, Text } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 import IButton from "../../components/buttons/IButton";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../assets/types";
+import { router } from "expo-router";
 import Colors, { Themes } from "../../constants/Colors";
 
 interface ITopBarProps {
@@ -15,18 +13,13 @@ interface ITopBarProps {
 const IProfileBar: React.FC<ITopBarProps> = () => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Modals'>>();
 
     const goToShare = () => {
-        // navigation.navigate('Settings', {
-        //     screen: 'Main',
-        // });
+        // Share functionality
     };
 
     const goEditProfile = () => {
-        navigation.navigate('Modals', {
-            screen: 'EditProfile',
-        });
+        router.push('/modals/editProfile');
     };
 
     const backgroundColor = {

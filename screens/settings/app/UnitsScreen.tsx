@@ -32,7 +32,7 @@ const UnitsScreen = () => {
         <CardWrapper>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={{ paddingBottom: 88, paddingTop: 44, width: "100%" }}
+                style={{ paddingBottom: 88, paddingTop: 44, width: "100%", backgroundColor: color.background }}
             >
                 <View style={{ alignItems: "center" }}>
                     <IList width="90%" label="units" background={hexToRGBA(color.handle, 0.8)} hrStart="Custom">

@@ -6,9 +6,7 @@ import Colors from "../../../constants/Colors";
 import { useTheme } from "../../context/ThemeContext";
 import { CardioExercise, useExerciseLayout } from "../../context/ExerciseLayoutZustand";
 import { useRoutine } from "../../context/RoutineZustand";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/assets/types";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 interface CardioSettingsProps {
     exerciseId: CardioExercise["id"];
@@ -22,7 +20,6 @@ const CardioSettings: React.FC<CardioSettingsProps> = ({ exerciseId, onClose }) 
     const { activeRoutine } = useRoutine();
     const layoutId = activeRoutine.layoutId;
     const exercise = getCardioExercise(layoutId, exerciseId);
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
     if (!exercise) return null;
 
@@ -38,12 +35,12 @@ const CardioSettings: React.FC<CardioSettingsProps> = ({ exerciseId, onClose }) 
             <OptionButton title={"Add Superset Excercise"} color={color.accent} icon={<Ionicons name="add-circle" color={color.accent} size={24} />}
                 onPress={() => {
                     onClose();
-                    navigation.navigate("Modals", { screen: "SuperSet", params: { layoutId: layoutId, exId: exerciseId } });
+                    router.push(`/modals/superSet?layoutId=${layoutId}&exId=${exerciseId}`);
                 }} />
             <OptionButton title={"Change Excercise"} color={color.text} icon={<Ionicons name="sync-circle" color={color.text} size={24} />}
                 onPress={() => {
                     onClose();
-                    navigation.navigate("Modals", { screen: "SwapExercise", params: { layoutId: layoutId, exId: exerciseId } });
+                    router.push(`/modals/swapExercise?layoutId=${layoutId}&exId=${exerciseId}`);
                 }} />
 
 

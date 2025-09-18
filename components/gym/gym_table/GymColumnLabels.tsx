@@ -10,9 +10,10 @@ import GymWightLabel from "./GymWightLabel";
 interface GymColumnLabelsProps {
   exerciseId: GymExercise["id"];
   heightAnim: Animated.Value;
+  readOnly?: boolean;
 }
 
-const GymColumnLabels: React.FC<GymColumnLabelsProps> = ({ exerciseId, heightAnim }) => {
+const GymColumnLabels: React.FC<GymColumnLabelsProps> = ({ exerciseId, heightAnim, readOnly }) => {
   const { theme } = useTheme();
   const color = Colors[theme as Themes];
   const { columns, exercise } = useGymActions(exerciseId);
@@ -22,7 +23,7 @@ const GymColumnLabels: React.FC<GymColumnLabelsProps> = ({ exerciseId, heightAni
 
   if (!exercise?.sets?.length) return null;
 
-  const headerOpacity = heightAnim.interpolate({
+  const headerOpacity = readOnly ? 1 : heightAnim.interpolate({
     inputRange: [0, 34],
     outputRange: [0, 1],
     extrapolate: "clamp",
@@ -42,7 +43,7 @@ const GymColumnLabels: React.FC<GymColumnLabelsProps> = ({ exerciseId, heightAni
       {columns.map((col, i) => {
         if (col === "kg")
           return (
-            <GymWightLabel exerciseId={exerciseId} heightAnim={heightAnim} />
+            <GymWightLabel exerciseId={exerciseId} heightAnim={heightAnim} readOnly={readOnly} />
           )
         return (
           <View key={i} style={styles.columnLabel}>

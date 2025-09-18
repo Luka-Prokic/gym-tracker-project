@@ -25,7 +25,8 @@ export function useRestStopwatchActions(
 ): UseRestStopwatchActionsReturn {
   const { activeRoutine } = useRoutine();
   const { getGymExercise, restTime, rest, updateRestTime } = useExerciseLayout();
-  const { autoRest } = useUser();
+  const { settings } = useUser();
+  const autoRest = settings.autoRest;
 
   const exercise = getGymExercise(activeRoutine.layoutId, exerciseId);
 

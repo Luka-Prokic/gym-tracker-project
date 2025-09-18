@@ -2,14 +2,13 @@ import { StyleSheet, Text, View } from "react-native";
 import { GymBodyPartFilter } from "./GymBodyPartFilterProps";
 import { GymEquipmentFilter } from "./GymEquipmentFilter";
 import { GymSearchBar } from "./GymSearchBar";
-import React from "react";
 import { ExerciseCard } from "./ExerciseCard";
 import { ScrollView } from "react-native-gesture-handler";
 import { BodypartType, EquipmentType, Exercise } from "@/components/context/ExerciseZustand";
 import { useTheme } from "@/components/context/ThemeContext";
 import Colors, { Themes } from "@/constants/Colors";
 import { Layout } from "@/components/context/ExerciseLayoutZustand";
-import { useRoute } from "@react-navigation/native";
+import { useLocalSearchParams } from "expo-router";
 import { useGymAddExerciseActions } from "./hooks/useGymAddExerciseActions";
 import NoResults from "@/components/text/NoResults";
 import IButton from "@/components/buttons/IButton";
@@ -25,8 +24,7 @@ export const GymAddExerciseSelector = () => {
     const color = Colors[theme as Themes];
 
 
-    const route = useRoute();
-    const { layoutId } = route.params as { layoutId: Layout["id"] };
+    const { layoutId } = useLocalSearchParams<{ layoutId: Layout["id"] }>();
 
     const {
         muscle,

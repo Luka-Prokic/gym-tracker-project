@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, forwardRef } from "react";
 import { TouchableOpacity, Text, StyleSheet, DimensionValue, ViewStyle, Animated } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 import Colors, { Themes } from "@/constants/Colors";
@@ -19,7 +19,7 @@ interface IButtonProps {
     style?: ViewStyle | ViewStyle[];
 }
 
-const IButton: React.FC<IButtonProps> = ({ title, onPress, disabled = false, children, color, style, textColor, width = 'auto', height = 'auto', length = 'medium', loading }) => {
+const IButton = forwardRef<TouchableOpacity, IButtonProps>(({ title, onPress, disabled = false, children, color, style, textColor, width = 'auto', height = 'auto', length = 'medium', loading }, ref) => {
     const { theme } = useTheme();
     const colors = Colors[theme as Themes];
     const buttonColor = color;
@@ -36,10 +36,9 @@ const IButton: React.FC<IButtonProps> = ({ title, onPress, disabled = false, chi
 
     const aspectRatio = aspectRatioMap[length];
 
-
-
     return (
         <TouchableOpacity
+            ref={ref}
             style={[styles.button, disabled && styles.disabled, { backgroundColor: buttonColor, aspectRatio: aspectRatio }, { width: width }, { height: height }, style]}
             onPress={onPress}
             disabled={disabled}
@@ -48,7 +47,9 @@ const IButton: React.FC<IButtonProps> = ({ title, onPress, disabled = false, chi
             {children ? children : <Text style={[styles.text, { color: textColor ?? colors.text }]}>{title}</Text>}
         </TouchableOpacity>
     );
-};
+});
+
+IButton.displayName = 'IButton';
 
 const styles = StyleSheet.create({
     button: {

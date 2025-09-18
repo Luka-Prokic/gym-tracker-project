@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Animated, StyleSheet } from "react-native";
+import { Animated, ScrollView, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useTheme } from "../../context/ThemeContext";
 import Colors, { Themes } from "../../../constants/Colors";
@@ -9,28 +9,40 @@ import GymTableHeader from "./GymTableHeader";
 import GymAddRowButton from "./GymAddRowButton";
 import GymRow from "../row/GymRow";
 import GymColumnLabels from "./GymColumnLabels";
-import { GymExercise, SuperSet, useExerciseLayout } from "../../context/ExerciseLayoutZustand";
+import { useExerciseLayout } from "../../context/ExerciseLayoutZustand";
 import GymNotes from "../../text/GymNotes";
 import { Sets } from "@/components/context/ExerciseZustand";
 import SubTableHeader from "../superset_table/SubTableHeader";
 import SuperSetRow from "../row/SuperSetRow";
 
 interface GymTableProps {
-    exerciseId: GymExercise["id"];
-    supersetId?: SuperSet["id"];
+    exerciseId: string;
+    supersetId?: string;
+    readOnly?: boolean;
 }
 
-export const GymTable: React.FC<GymTableProps> = ({ exerciseId, supersetId }) => {
+export const GymTable: React.FC<GymTableProps> = ({ exerciseId, supersetId, readOnly }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const { heightAnim, fadeIn, layoutId, exercise, setRestIndex } = useGymActions(exerciseId);
     const { restStatus, endRest, getSuperSet } = useExerciseLayout();
 
+    // For read-only mode, calculate static height
+    const totalSets = exercise?.sets?.length ?? 0;
+    const totalDropSets = exercise?.sets?.reduce(
+        (sum, set) => sum + (set.dropSets?.length ?? 0),
+        0
+    ) ?? 0;
+    const staticHeight = totalSets * 44 + totalDropSets * 34 + 1;
+
     const ss = getSuperSet(layoutId, supersetId ?? "");
 
     if (!exercise) {
+        console.log(`GymTable: No exercise found for ID ${exerciseId}`);
         return null;
     }
+
+    console.log(`GymTable: Rendering exercise ${exerciseId}, readOnly: ${readOnly}, staticHeight: ${staticHeight}, totalSets: ${totalSets}`);
 
     const opacity = heightAnim.interpolate({
         inputRange: [0, 34],
@@ -48,10 +60,12 @@ export const GymTable: React.FC<GymTableProps> = ({ exerciseId, supersetId }) =>
                     <SubTableHeader
                         exerciseId={exerciseId}
                         supersetId={supersetId ?? ""}
+                        readOnly={readOnly}
                     />
                     :
                     <GymTableHeader
                         exerciseId={exerciseId}
+                        readOnly={readOnly}
                     />
                 }
 
@@ -68,6 +82,7 @@ export const GymTable: React.FC<GymTableProps> = ({ exerciseId, supersetId }) =>
                         <GymColumnLabels
                             exerciseId={exerciseId}
                             heightAnim={heightAnim}
+                            readOnly={readOnly}
                         />
                         <Animated.View
                             key={exerciseId}
@@ -75,10 +90,10 @@ export const GymTable: React.FC<GymTableProps> = ({ exerciseId, supersetId }) =>
                                 styles.table,
                                 {
                                     borderColor: color.handle,
-                                    height: heightAnim,
+                                    height: readOnly ? staticHeight : heightAnim,
                                     borderBottomLeftRadius: 16,
                                     borderBottomRightRadius: 16,
-                                    opacity
+                                    opacity: readOnly ? 1 : opacity
                                 },
                             ]}
                         >
@@ -89,6 +104,7 @@ export const GymTable: React.FC<GymTableProps> = ({ exerciseId, supersetId }) =>
                                     index: index,
                                     set: set,
                                     startRest: () => { setRestIndex(index) },
+                                    readOnly: readOnly,
                                 };
 
                                 if (ss)
@@ -99,17 +115,17 @@ export const GymTable: React.FC<GymTableProps> = ({ exerciseId, supersetId }) =>
                     </>
                 ) : null}
 
-                {ss?.settings.supersetType === "circuit" ?
+                {!readOnly && ss?.settings.supersetType === "circuit" ?
                     null
                     :
-                    <GymAddRowButton
+                    !readOnly && <GymAddRowButton
                         exerciseId={exerciseId}
                         layoutId={layoutId}
                     />
                 }
 
 
-                {ss || exercise.settings.noNote ? null : <GymNotes
+                {readOnly || ss || exercise.settings.noNote ? null : <GymNotes
                     elementId={exerciseId} style={{ marginTop: 16 }} />}
 
             </GestureHandlerRootView >

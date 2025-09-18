@@ -13,9 +13,10 @@ import Container from "@/components/containers/Container";
 
 interface GymTableHeaderProps {
     exerciseId: GymExercise["id"];
+    readOnly?: boolean;
 };
 
-const GymTableHeader: React.FC<GymTableHeaderProps> = ({ exerciseId }) => {
+const GymTableHeader: React.FC<GymTableHeaderProps> = ({ exerciseId, readOnly }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const { settingsVisible, closeSettings, openSettings, exercise, exerciseName } = useGymActions(exerciseId);
@@ -48,9 +49,9 @@ const GymTableHeader: React.FC<GymTableHeaderProps> = ({ exerciseId }) => {
 
             <View style={[styles.top]} >
 
-                <RestSettings exerciseId={exerciseId} />
+                {!readOnly && <RestSettings exerciseId={exerciseId} />}
 
-                <IButton
+                {!readOnly && <IButton
                     height={22} width={44}
                     style={styles.button}
                     onPress={openSettings}
@@ -62,7 +63,7 @@ const GymTableHeader: React.FC<GymTableHeaderProps> = ({ exerciseId }) => {
                             Edit
                         </Text>
                     </View>
-                </IButton>
+                </IButton>}
 
             </View>
         </Container>

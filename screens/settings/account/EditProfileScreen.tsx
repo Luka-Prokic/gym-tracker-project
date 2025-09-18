@@ -14,7 +14,7 @@ export default function EditProfileScreen() {
     return (
         <ScrollView
             showsVerticalScrollIndicator={false}
-            style={{ paddingBottom: 88, width: "100%", backgroundColor: color.secondaryBackground }}
+            style={{ paddingBottom: 88, width: "100%", backgroundColor: color.background }}
         >
         </ScrollView>
     );

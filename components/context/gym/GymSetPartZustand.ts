@@ -11,6 +11,25 @@ export const createGymRestZustand = (set: any, get: any) => ({
         newSet: Sets = defaultSet
     ) => {
         set((state: any) => {
+            // Staging-aware
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (!found || !isGymExercise(found.exercise)) return {};
+                    const { parent, index, exercise } = found;
+                    const updatedExercise: GymExercise = {
+                        ...exercise,
+                        sets: [...(exercise.sets || []), newSet],
+                    };
+                    parent[index] = updatedExercise;
+                    newStagingLayouts.set(layoutId, { ...currentStaging, layout: items });
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
 
@@ -39,6 +58,21 @@ export const createGymRestZustand = (set: any, get: any) => ({
         setIndex: number
     ) => {
         set((state: any) => {
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (!found || !isGymExercise(found.exercise)) return {};
+                    const { parent, index, exercise } = found;
+                    const updatedSets = (exercise.sets || []).filter((_, i) => i !== setIndex);
+                    parent[index] = { ...exercise, sets: updatedSets };
+                    newStagingLayouts.set(layoutId, { ...currentStaging, layout: items });
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
 
@@ -65,6 +99,23 @@ export const createGymRestZustand = (set: any, get: any) => ({
         updatedSet: Sets
     ) => {
         set((state: any) => {
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (!found || !isGymExercise(found.exercise)) return {};
+                    const { parent, index, exercise } = found;
+                    const newSets = (exercise.sets || []).map((s, i) =>
+                        i === setIndex ? { ...s, ...updatedSet } : s
+                    );
+                    parent[index] = { ...exercise, sets: newSets };
+                    newStagingLayouts.set(layoutId, { ...currentStaging, layout: items });
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
 
@@ -94,6 +145,23 @@ export const createGymRestZustand = (set: any, get: any) => ({
         value: Sets[K]
     ) => {
         set((state: any) => {
+            if (state.editingSessions && state.editingSessions.has(layoutId)) {
+                const newStagingLayouts = new Map(state.stagingLayouts);
+                const currentStaging = newStagingLayouts.get(layoutId);
+                if (currentStaging) {
+                    const items = [...currentStaging.layout];
+                    const found = findExercise(items, exId);
+                    if (!found || !isGymExercise(found.exercise)) return {};
+                    const { parent, index, exercise } = found;
+                    const updatedSets = (exercise.sets || []).map((s, i) =>
+                        i === setIndex ? { ...s, [column]: value } : s
+                    );
+                    parent[index] = { ...exercise, sets: updatedSets };
+                    newStagingLayouts.set(layoutId, { ...currentStaging, layout: items });
+                    return { stagingLayouts: newStagingLayouts };
+                }
+            }
+
             const layouts = state.layouts.map((layout: Layout) => {
                 if (layout.id !== layoutId) return layout;
 

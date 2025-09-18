@@ -10,7 +10,7 @@ import IButton from "@/components/buttons/IButton";
 import { useTheme } from "@/components/context/ThemeContext";
 import Colors, { Themes } from "@/constants/Colors";
 import { GymExercise, Layout } from "@/components/context/ExerciseLayoutZustand";
-import { useRoute } from "@react-navigation/native";
+import { useLocalSearchParams } from "expo-router";
 import { useGymSwapExerciseActions } from "./hooks/useGymSwapExerciseActions";
 import NoResults from "@/components/text/NoResults";
 import { ScrollView } from "react-native-gesture-handler";
@@ -24,8 +24,7 @@ export const GymSwapExerciseSelector = () => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
 
-    const route = useRoute();
-    const { layoutId, exId } = route.params as { layoutId: Layout["id"], exId: GymExercise["id"] };
+    const { layoutId, exId } = useLocalSearchParams<{ layoutId: Layout["id"], exId: GymExercise["id"] }>();
 
     const {
         muscle,

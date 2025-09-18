@@ -1,16 +1,12 @@
 import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import ProfileScreen from "../screens/ProfileScreen";
-import Colors, { Themes } from "../constants/Colors";
-import { useTheme } from "../components/context/ThemeContext";
-import CakaIcon from "../components/mis/CakaIcon";
-import { HomeParamList } from "../assets/types";
-import IProfileBar from "../components/headers/IProfileBar";
-import CorruptScreen from "../screens/corrupt/CorruptScreen";
+import { Tabs } from "expo-router";
+import Colors, { Themes } from "../../constants/Colors";
+import { useTheme } from "../../components/context/ThemeContext";
+import CakaIcon from "../../components/mis/CakaIcon";
+import IProfileBar from "../../components/headers/IProfileBar";
+import MainHeader from "../../components/headers/main/MainHeader";
 
-const Tab = createBottomTabNavigator<HomeParamList>();
-
-export default function TabNavigator() {
+export default function TabLayout() {
     const { theme } = useTheme();
     const colors = Colors[theme as Themes];
 
@@ -24,7 +20,7 @@ export default function TabNavigator() {
     }[theme as Themes];
 
     return (
-        <Tab.Navigator
+        <Tabs
             screenOptions={{
                 tabBarLabelPosition: "below-icon",
                 tabBarInactiveTintColor: "#858589",
@@ -41,10 +37,10 @@ export default function TabNavigator() {
                 },
             }}
         >
-            <Tab.Screen
-                name="Corrupt"
-                component={CorruptScreen}
+            <Tabs.Screen
+                name="index"
                 options={{
+                    title: "Corrupt",
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <CakaIcon
@@ -57,11 +53,12 @@ export default function TabNavigator() {
                     tabBarActiveTintColor: colors.tabIconHomeSelected,
                 }}
             />
-            <Tab.Screen
-                name="Profile"
-                component={ProfileScreen}
+            <Tabs.Screen
+                name="profile"
                 options={{
-                    header: (() => <IProfileBar />),
+                    title: "Profile",
+                    headerShown: true,
+                    header: () => <IProfileBar />,
                     tabBarIcon: ({ color, focused }) => (
                         <CakaIcon
                             name="circle-icon"
@@ -72,6 +69,6 @@ export default function TabNavigator() {
                     tabBarActiveTintColor: colors.tabIconProfileSelected,
                 }}
             />
-        </Tab.Navigator>
+        </Tabs>
     );
 }

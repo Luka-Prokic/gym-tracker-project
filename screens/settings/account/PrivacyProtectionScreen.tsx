@@ -17,7 +17,7 @@ export default function PrivacyProtectionScreen() {
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 style={[{
-                    paddingBottom: 88, paddingTop: 44, width: "100%",
+                    paddingBottom: 88, paddingTop: 44, width: "100%", backgroundColor: color.background,
                 }]}
             >
             </ScrollView>

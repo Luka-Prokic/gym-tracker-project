@@ -15,6 +15,7 @@ import GymTable from "../gym_table/GymTable";
 
 interface SuperSetTableProps {
     supersetId: SuperSet["id"];
+    readOnly?: boolean;
 }
 
 export const SuperSetTable: React.FC<SuperSetTableProps> = ({ supersetId }) => {
@@ -44,12 +45,11 @@ export const SuperSetTable: React.FC<SuperSetTableProps> = ({ supersetId }) => {
 
             {ss.layout.map((ex: any, index: number) => {
                 const commonProps = {
-                    key: `subtable-${ss.layout.length}-${index}`,
                     exerciseId: ex.id,
                     supersetId: supersetId,
                 };
-                if (isGymExercise(ex)) return <GymTable {...commonProps} />
-                if (isCardioExercise(ex)) return <CardioTable {...commonProps} />
+                if (isGymExercise(ex)) return <GymTable key={`subtable-${ss.layout.length}-${index}`} {...commonProps} />
+                if (isCardioExercise(ex)) return <CardioTable key={`subtable-${ss.layout.length}-${index}`} {...commonProps} />
                 return null;
             })}
 

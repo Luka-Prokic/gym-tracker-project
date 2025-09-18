@@ -18,6 +18,7 @@ export default function NotificationsScreen() {
                     paddingTop: 44,
                     width: "100%",
                     minHeight: SCREEN_HEIGHT,
+                    backgroundColor: color.background,
                 }}
             >
                 <ActivityIndicator size="large" />

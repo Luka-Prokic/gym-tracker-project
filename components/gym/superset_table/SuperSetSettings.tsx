@@ -4,9 +4,7 @@ import Container from "../../containers/Container";
 import Colors, { Themes } from "../../../constants/Colors";
 import { useTheme } from "../../context/ThemeContext";
 import { SuperSet, useExerciseLayout } from "../../context/ExerciseLayoutZustand";
-import { RootStackParamList } from "@/assets/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { useRoutine } from "@/components/context/RoutineZustand";
 import IText from "@/components/text/IText";
 
@@ -25,7 +23,6 @@ const SuperSetSettings: React.FC<SuperSetSettingsBubbleProps> = ({ supersetId, o
         updateSuperSetSettings,
         updateSuperSetName,
     } = useExerciseLayout();
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
     const layoutId = activeRoutine.layoutId;
 
     const ss = getSuperSet(layoutId, supersetId)
@@ -49,7 +46,7 @@ const SuperSetSettings: React.FC<SuperSetSettingsBubbleProps> = ({ supersetId, o
             <OptionButton title={"Update Superset Layout"} color={color.tint} icon={<Ionicons name="caret-up-circle" color={color.tint} size={24} />}
                 onPress={() => {
                     onClose();
-                    navigation.navigate("Modals", { screen: "SuperSet", params: { layoutId: layoutId, exId: "", superSetId: supersetId } });
+                    router.push(`/modals/superSet?layoutId=${layoutId}&exId=&superSetId=${supersetId}`);
                 }} />
 
             <Container width={"100%"}>
