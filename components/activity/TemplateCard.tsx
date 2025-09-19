@@ -10,6 +10,7 @@ import { isGymExercise, isSuperSet, isCardioExercise } from '../context/utils/Gy
 import { useRoutine } from '../context/RoutineZustand';
 import hexToRGBA from '../../assets/hooks/HEXtoRGB';
 import { SCREEN_WIDTH } from '@/constants/ScreenWidth';
+import { useBodyParts } from '../../hooks/useBodyParts';
 
 interface TemplateCardProps {
     layout: Layout;
@@ -51,6 +52,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const { routines } = useRoutine();
+    const bodyParts = useBodyParts(layout);
+
+    // Glass background using thirdBackground for differentiation from RoutineCard
+    const glassBackgroundColor = hexToRGBA(color.thirdBackground, 0.5);
 
     const getRoutineTitle = (layout: Layout) => {
         // Use custom name if provided (for recent workouts), otherwise use layout name
@@ -74,11 +79,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                 const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
                 if (diffInHours < 24) {
-                    // Today - show time
+                    // Today - show time in 24-hour format
                     return date.toLocaleTimeString('en-US', {
-                        hour: 'numeric',
+                        hour: '2-digit',
                         minute: '2-digit',
-                        hour12: true
+                        hour12: false
                     });
                 } else {
                     // Older - show date
@@ -95,7 +100,14 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         const exerciseCount = layout.layout.filter(ex => 
             isGymExercise(ex) || isSuperSet(ex) || isCardioExercise(ex)
         ).length;
-        return `${exerciseCount} exercises`;
+        
+        if (exerciseCount === 0) {
+            return "no exercises";
+        } else if (exerciseCount === 1) {
+            return "1 exercise";
+        } else {
+            return `${exerciseCount} exercises`;
+        }
     };
 
     const title = getRoutineTitle(layout);
@@ -106,75 +118,106 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         if (isSelecting) {
             onSelect?.(layout.id);
         } else {
-            onPress();
+            onEdit?.();
         }
     };
 
     return (
-        <Container >
+        <Container width={"100%"} style={styles.templateCard}>
             <Pressable
-                style={[styles.cardContent, { backgroundColor: hexToRGBA(color.primaryBackground, 0.8) }]}
+                style={[styles.cardContent, { backgroundColor: glassBackgroundColor }]}
                 onPress={handleCardPress}
             >
-                <View style={styles.cardHeader}>
-                    {isSelecting && (
-                        <IButton width={40} height={40} onPress={() => onSelect?.(layout.id)}>
-                            <Ionicons
-                                name={selected ? "checkbox" : "square-outline"}
-                                size={24}
-                                color={color.text}
-                            />
-                        </IButton>
-                    )}
-                    <View style={styles.cardInfo}>
-                        <Text style={[styles.routineTitle, { color: color.text }]} numberOfLines={2}>
-                            {title}
-                        </Text>
-                        <View style={styles.statsContainer}>
-                            <Text style={[styles.routineStats, { color: color.grayText }]}>
-                                {stats}
+                {/* Main content area */}
+                <View style={styles.mainContent}>
+                    {/* Description section - 85% width */}
+                    <View style={styles.descriptionSection}>
+                        <View style={styles.cardInfo}>
+                            <Text style={[styles.routineTitle, { color: color.text }]} numberOfLines={1} ellipsizeMode="tail">
+                                {title}
                             </Text>
-                            <Text style={[styles.statusBadge, { 
-                                color: status === 'template' ? color.accent : color.tint,
-                                backgroundColor: hexToRGBA(status === 'template' ? color.accent : color.tint, 0.1)
-                            }]}>
-                                {status}
-                            </Text>
+                            <View style={styles.statsContainer}>
+                                <View style={styles.bodyPartsTags}>
+                                    {bodyParts.slice(0, 3).map((bodyPart, index) => (
+                                        <Text 
+                                            key={index}
+                                            style={[styles.statusBadge, { 
+                                                color: status === 'template' ? color.accent : color.tint,
+                                                backgroundColor: hexToRGBA(status === 'template' ? color.accent : color.tint, 0.1)
+                                            }]}
+                                        >
+                                            {bodyPart.name}
+                                        </Text>
+                                    ))}
+                                    {bodyParts.length > 3 && (
+                                        <Text
+                                            style={[styles.statusBadge, {
+                                                color: status === 'template' ? color.accent : color.tint,
+                                                backgroundColor: hexToRGBA(status === 'template' ? color.accent : color.tint, 0.1)
+                                            }]}
+                                        >
+                                            ...
+                                        </Text>
+                                    )}
+                                </View>
+                            </View>
+                            {/* Bottom section with Tap to edit/select and exercise counter */}
+                            <View style={styles.bottomSection}>
+                                <View style={styles.cardFooter}>
+                                    <View style={[styles.difficultyIndicator, { backgroundColor: color.accent }]} />
+                                    <Text style={[styles.startText, { color: color.accent }]}>
+                                        {isSelecting ? 'Tap to select' : 'Tap to edit'}
+                                    </Text>
+                                </View>
+                                <Text style={[styles.routineStats, { color: color.text }]}>
+                                    {stats}
+                                </Text>
+                            </View>
                         </View>
                     </View>
-                    <View style={styles.cardActions}>
-                        {showFavorite && (
-                            <IButton width={40} height={40} onPress={onToggleFavorite} disabled={!!isSelecting}>
+
+                    {/* Buttons section - 15% width */}
+                    <View style={styles.buttonsSection}>
+                        {isSelecting ? (
+                            /* Selection mode - only show selection button */
+                            <IButton width={40} height={40} onPress={() => onSelect?.(layout.id)}>
                                 <Ionicons
-                                    name={isFavorite ? "bookmark" : "bookmark-outline"}
+                                    name={selected ? "checkbox" : "square-outline"}
                                     size={24}
-                                    color={isFavorite ? color.accent : color.grayText}
+                                    color={color.text}
                                 />
                             </IButton>
-                        )}
-                        {showActions && (
-                            <View style={styles.actionsContainer}>
-                                {showEdit && (
-                                    <IButton width={32} height={32} onPress={onEdit} disabled={!!isSelecting}>
-                                        <Ionicons name="create-outline" size={18} color={color.accent} />
+                        ) : (
+                            /* Normal mode - show all other buttons */
+                            <>
+                                {showFavorite && (
+                                    <IButton width={40} height={40} onPress={onToggleFavorite}>
+                                        <Ionicons
+                                            name={isFavorite ? "bookmark" : "bookmark-outline"}
+                                            size={24}
+                                            color={isFavorite ? color.accent : color.grayText}
+                                        />
                                     </IButton>
                                 )}
-                                <IButton ref={bubbleAnchorRef as any} width={32} height={32} onPress={onDelete} disabled={!!isSelecting}>
-                                    <Ionicons
-                                        name={savedContext ? "bookmark" : "trash-outline"}
-                                        size={18}
-                                        color={color.error}
-                                    />
-                                </IButton>
-                            </View>
+                                {showActions && (
+                                    <View style={styles.actionsContainer}>
+                                        <IButton ref={bubbleAnchorRef as any} width={32} height={32} onPress={onDelete}>
+                                            <Ionicons
+                                                name={savedContext ? "bookmark" : "trash-outline"}
+                                                size={18}
+                                                color={color.error}
+                                            />
+                                        </IButton>
+                                        {showEdit && (
+                                            <IButton width={32} height={32} onPress={onPress}>
+                                                <Ionicons name="play" size={18} color={color.accent} />
+                                            </IButton>
+                                        )}
+                                    </View>
+                                )}
+                            </>
                         )}
                     </View>
-                </View>
-                <View style={styles.cardFooter}>
-                    <View style={[styles.difficultyIndicator, { backgroundColor: color.accent }]} />
-                    <Text style={[styles.startText, { color: color.accent }]}>
-                        Tap to start
-                    </Text>
                 </View>
             </Pressable>
         </Container>
@@ -182,57 +225,81 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 };
 
 const styles = StyleSheet.create({
+    templateCard: {
+        marginBottom: 8,
+        width: '100%',
+    },
     cardContent: {
         borderRadius: 12,
         padding: 16,
         height: 132,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        width: '100%',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 3,
+        position: 'relative',
+        backdropFilter: 'blur(20px)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
-    cardHeader: {
+    mainContent: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 8,
+        height: '100%',
+        alignItems: 'stretch',
+    },
+    descriptionSection: {
+        width: '85%',
+        paddingRight: 8,
+    },
+    buttonsSection: {
+        width: '15%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
     },
     cardInfo: {
         flex: 1,
-        marginRight: 8,
-    },
-    cardActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
     },
     actionsContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         gap: 4,
+        alignItems: 'center',
     },
     routineTitle: {
-        fontSize: 17,
+        fontSize: 22,
         fontWeight: '600',
-        marginBottom: 2,
-        lineHeight: 22,
+        marginBottom: 8,
+        lineHeight: 28,
     },
     statsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
         gap: 8,
-        marginBottom: 4,
+        marginBottom: 16,
+    },
+    bottomSection: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 'auto',
     },
     routineStats: {
         fontSize: 13,
         fontWeight: '400',
     },
     statusBadge: {
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: '600',
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 8,
         textTransform: 'uppercase',
+    },
+    bodyPartsTags: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
     },
     cardFooter: {
         flexDirection: 'row',

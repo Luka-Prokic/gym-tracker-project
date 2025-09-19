@@ -22,40 +22,40 @@ export const createGymSetZustand = (set: any, get: any) => ({
                     const supersetIndex = items.findIndex(item => isSuperSet(item) && item.id === itemId);
                     if (supersetIndex !== -1) {
                         const sup = items[supersetIndex] as SuperSet;
-                        if (sup.settings.supersetType === 'circuit') {
+                            if (sup.settings.supersetType === 'circuit') {
                             items[supersetIndex] = {
-                                ...sup,
-                                restLength: restTime,
-                                settings: {
-                                    ...sup.settings,
-                                    noRest: sup.settings.noRest,
-                                },
-                            };
-                        }
+                                    ...sup,
+                                    restLength: restTime,
+                                    settings: {
+                                        ...sup.settings,
+                                        noRest: sup.settings.noRest,
+                                    },
+                                };
+                            }
                     } else {
                         // Otherwise find the exercise using findExercise
                         const found = findExercise(items, itemId);
                         if (found) {
                             if (isGymExercise(found.exercise)) {
                                 const ge = found.exercise as GymExercise;
-                                const originalSets = ge.sets ?? [];
-                                const updatedSets = originalSets.map((s, idx) =>
-                                    idx === setIndex ? { ...s, rest: restTime } : s
-                                );
+                            const originalSets = ge.sets ?? [];
+                            const updatedSets = originalSets.map((s, idx) =>
+                                idx === setIndex ? { ...s, rest: restTime } : s
+                            );
                                 found.parent[found.index] = {
-                                    ...ge,
-                                    sets: updatedSets,
-                                };
+                                ...ge,
+                                sets: updatedSets,
+                            };
                             } else if (isCardioExercise(found.exercise)) {
                                 const ce = found.exercise as CardioExercise;
-                                const originalIntervals = ce.intervals ?? [];
-                                const updatedIntervals = originalIntervals.map((interval, idx) =>
-                                    idx === setIndex ? { ...interval, rest: restTime } : interval
-                                );
+                            const originalIntervals = ce.intervals ?? [];
+                            const updatedIntervals = originalIntervals.map((interval, idx) =>
+                                idx === setIndex ? { ...interval, rest: restTime } : interval
+                            );
                                 found.parent[found.index] = {
-                                    ...ce,
-                                    intervals: updatedIntervals,
-                                };
+                                ...ce,
+                                intervals: updatedIntervals,
+                            };
                             }
                         }
                     }
@@ -79,43 +79,43 @@ export const createGymSetZustand = (set: any, get: any) => ({
                 const supersetIndex = items.findIndex(item => isSuperSet(item) && item.id === itemId);
                 if (supersetIndex !== -1) {
                     const sup = items[supersetIndex] as SuperSet;
-                    if (sup.settings.supersetType === 'circuit') {
+                        if (sup.settings.supersetType === 'circuit') {
                         items[supersetIndex] = {
-                            ...sup,
-                            restLength: restTime,
-                            settings: {
-                                ...sup.settings,
-                                noRest: sup.settings.noRest,
-                            },
-                        };
-                    }
+                                ...sup,
+                                restLength: restTime,
+                                settings: {
+                                    ...sup.settings,
+                                    noRest: sup.settings.noRest,
+                                },
+                            };
+                        }
                 } else {
                     // Otherwise find the exercise using findExercise
                     const found = findExercise(items, itemId);
                     if (found) {
                         if (isGymExercise(found.exercise)) {
                             const ge = found.exercise as GymExercise;
-                            const originalSets = ge.sets ?? [];
-                            const updatedSets = originalSets.map((s, idx) =>
-                                idx === setIndex ? { ...s, rest: restTime } : s
-                            );
+                        const originalSets = ge.sets ?? [];
+                        const updatedSets = originalSets.map((s, idx) =>
+                            idx === setIndex ? { ...s, rest: restTime } : s
+                        );
                             found.parent[found.index] = {
-                                ...ge,
-                                sets: updatedSets,
-                            };
+                            ...ge,
+                            sets: updatedSets,
+                        };
                         } else if (isCardioExercise(found.exercise)) {
                             const ce = found.exercise as CardioExercise;
-                            const originalIntervals = ce.intervals ?? [];
-                            const updatedIntervals = originalIntervals.map((interval, idx) =>
-                                idx === setIndex ? { ...interval, rest: restTime } : interval
-                            );
+                        const originalIntervals = ce.intervals ?? [];
+                        const updatedIntervals = originalIntervals.map((interval, idx) =>
+                            idx === setIndex ? { ...interval, rest: restTime } : interval
+                        );
                             found.parent[found.index] = {
-                                ...ce,
-                                intervals: updatedIntervals,
-                            };
+                            ...ce,
+                            intervals: updatedIntervals,
+                        };
                         }
                     }
-                }
+                    }
 
                 return { ...layout, layout: items };
             });
@@ -218,9 +218,9 @@ export const createGymSetZustand = (set: any, get: any) => ({
                                 if (!isGymExercise(child)) return child;
 
                                 const originalSets = child.sets ?? [];
-                                const updatedSets = originalSets.map((s, idx) =>
-                                    idx === setIndex ? { ...s, rest: restTime } : s
-                                );
+                        const updatedSets = originalSets.map((s, idx) =>
+                            idx === setIndex ? { ...s, rest: restTime } : s
+                        );
 
                                 return { ...child, sets: updatedSets };
                             }),
@@ -242,17 +242,17 @@ export const createGymSetZustand = (set: any, get: any) => ({
                             };
                         } else if (isCardioExercise(found.exercise)) {
                             const ce = found.exercise as CardioExercise;
-                            const originalIntervals = ce.intervals ?? [];
-                            const updatedIntervals = originalIntervals.map((interval, idx) =>
-                                idx === setIndex ? { ...interval, rest: restTime } : interval
-                            );
+                        const originalIntervals = ce.intervals ?? [];
+                        const updatedIntervals = originalIntervals.map((interval, idx) =>
+                            idx === setIndex ? { ...interval, rest: restTime } : interval
+                        );
                             found.parent[found.index] = {
-                                ...ce,
-                                intervals: updatedIntervals,
-                            };
+                            ...ce,
+                            intervals: updatedIntervals,
+                        };
                         }
                     }
-                }
+                    }
 
                 return { ...layout, layout: items };
             });

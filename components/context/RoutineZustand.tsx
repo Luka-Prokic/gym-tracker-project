@@ -162,7 +162,8 @@ export const useRoutine = create<RoutineStoreState>((set, get) => {
                     
                     const layout = getLayout(routineToUpdate.layoutId);
                     if (layout) {
-                        const baseName = layout.name;
+                        // Use "Workout" as the base name instead of layout name
+                        const baseName = "Workout";
 
                         // Find existing finished routines on the same day with similar base names
                         const sameDayRoutines = state.routines.filter((r: any) =>

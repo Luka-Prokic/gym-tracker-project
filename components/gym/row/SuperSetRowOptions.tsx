@@ -71,7 +71,7 @@ const SuperSetRowOptions: React.FC<SuperSetRowOptionsProps> = ({ exerciseId, sup
             onPress={deleteRow}
         >
             <Text
-                style={styles.optionText}
+                style={[styles.optionText, { color: color.secondaryText }]}
             >
                 Delete
             </Text>

@@ -26,8 +26,8 @@ export const ReadOnlySuperSetTable: React.FC<ReadOnlySuperSetTableProps> = ({ su
 
     return (
         <View style={[
-            styles.container, 
-            { 
+            styles.container,
+            {
                 backgroundColor: hexToRGBA(color.fourthBackground, 0.2),
                 shadowColor: color.shadow,
                 borderColor: color.border,
@@ -60,16 +60,18 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         borderWidth: 1,
         overflow: "hidden",
+        alignItems: "center",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
+        gap: 16,
     },
     header: {
         padding: 12,
     },
     headerText: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: "bold",
         textAlign: "center",
     },

@@ -116,22 +116,22 @@ export default function CancelRoutineButton() {
                         Do you want to save this workout as a template before canceling?
                     </Text>
 
-                    <View style={{ gap: 12 }}>
+                    <View style={{ gap: 12, alignItems: 'center' }}>
                         <IButton
-                            width={"100%"}
+                            width={"120%"}
                             height={44}
                             title={"Save as Template"}
                             color={color.accent}
-                            textColor={color.primaryBackground}
+                            textColor={color.secondaryText}
                             onPress={handleSaveAsTemplate}
                         />
                         
                         <IButton
-                            width={"100%"}
+                            width={"120%"}
                             height={44}
                             title={"Cancel Workout"}
                             color={color.error}
-                            textColor={color.primaryBackground}
+                            textColor={color.secondaryText}
                             onPress={handleDiscardWorkout}
                         />
                     </View>

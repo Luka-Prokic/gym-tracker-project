@@ -25,6 +25,9 @@ import TabButton from '../../components/activity/TabButton';
 import EmptyState from '../../components/activity/EmptyState';
 import ComingSoon from '../../components/activity/ComingSoon';
 import TemplateCard from '../../components/activity/TemplateCard';
+import TemplatesTab from '../../components/activity/TemplatesTab';
+import WorkoutsTab from '../../components/activity/WorkoutsTab';
+import FullCalendar from '../../components/activity/FullCalendar';
 
 // Activity hooks
 import { useRoutineData } from '../../components/activity/hooks/useRoutineData';
@@ -36,7 +39,7 @@ export default function ActivityScreen() {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const params = useLocalSearchParams();
-    const initialTab = (params.tab as 'templates' | 'recent' | 'saved') || 'templates';
+    const initialTab = (params.tab as 'templates' | 'workouts' | 'saved') || 'templates';
 
     const tabBackgroundColor = {
         light: "rgba(255, 255, 255, 0.2)",
@@ -51,7 +54,7 @@ export default function ActivityScreen() {
     const { removeRoutine } = useRoutine();
 
     // Activity hooks
-    const { recentRoutines, templateLayouts, savedLayoutsList, allLayouts } = useRoutineData();
+    const { templateLayouts, savedLayoutsList } = useRoutineData();
     const { savedRoutineLayouts, toggleSaved, isSaved } = useSavedRoutines();
 
     const { selectedTab, setSelectedTab, tabs } = useActivityTabs(initialTab);
@@ -59,23 +62,30 @@ export default function ActivityScreen() {
     // Delete confirmation state
     const [deleteLayout, setDeleteLayout] = useState<any>(null);
     const [deleteRoutine, setDeleteRoutine] = useState<any>(null);
+    
+    // Start confirmation state
+    const [startLayout, setStartLayout] = useState<any>(null);
     const [isSelecting, setIsSelecting] = useState(false);
     const [selectedItems, setSelectedItems] = useState(new Set<string>());
     const [deleteItems, setDeleteItems] = useState<string[]>([]);
     const { bubbleRef, top, left, height, width, makeBubble, bubbleVisible, popBubble } = useBubbleLayout();
     const [anchorId, setAnchorId] = useState<string | null>(null);
     const [isSlideVisible, setIsSlideVisible] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<string>('');
+    const [selectedDateObj, setSelectedDateObj] = useState<Date | null>(null);
+    const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+    const [navigateToDate, setNavigateToDate] = useState<Date | null>(null);
+    const [currentWorkoutsTabDate, setCurrentWorkoutsTabDate] = useState<Date | null>(null);
+    const [getCurrentWorkoutsTabDate, setGetCurrentWorkoutsTabDate] = useState<(() => Date | null) | null>(null);
+
+    // Shared selected date state for synchronization between FullCalendar and WorkoutsTab
+    const [sharedSelectedDate, setSharedSelectedDate] = useState<Date | null>(new Date());
 
     const startRoutine = (layout: any) => {
         startNewRoutine({
             fromLayout: layout,
             navigationMethod: 'replace'
         });
-    };
-
-    const handleDeletePress = (layout: any) => {
-        setDeleteLayout(layout);
-        makeBubble();
     };
 
     const handleConfirmDelete = () => {
@@ -85,7 +95,7 @@ export default function ActivityScreen() {
                     const { removeLayout } = useExerciseLayout.getState();
                     removeLayout(id);
                 });
-            } else if (selectedTab === 'recent') {
+            } else if (selectedTab === 'workouts') {
                 deleteItems.forEach(id => removeRoutine(id));
             } else if (selectedTab === 'saved') {
                 deleteItems.forEach(id => removeFromSaved(id));
@@ -116,6 +126,11 @@ export default function ActivityScreen() {
         popBubble();
     };
 
+    const handleCancelStart = () => {
+        setStartLayout(null);
+        popBubble();
+    };
+
     const handleCancelMultiDelete = () => {
         setIsSlideVisible(false);
     };
@@ -134,6 +149,39 @@ export default function ActivityScreen() {
         setTimeout(() => makeBubble(), 0);
     };
 
+    const handleStartLayout = (layout: any) => {
+        setStartLayout(layout);
+        setAnchorId(layout.id);
+        setTimeout(() => makeBubble(), 0);
+    };
+
+    const handleCalendarDateSelect = (date: Date) => {
+        // Navigate to the selected date in the workouts tab
+        setNavigateToDate(date);
+
+        // Clear the navigation after a short delay to allow for re-navigation
+        setTimeout(() => {
+            setNavigateToDate(null);
+        }, 100);
+    };
+
+    const handleDateChange = (dateLabel: string, dateObj?: Date) => {
+        setSelectedDate(dateLabel);
+        if (dateObj) {
+            setSelectedDateObj(dateObj);
+            setCurrentWorkoutsTabDate(dateObj);
+        }
+    };
+
+    const handleGetCurrentDate = (getCurrentDate: () => Date | null) => {
+        setGetCurrentWorkoutsTabDate(() => getCurrentDate);
+    };
+
+    // Handler for updating shared selected date
+    const handleSharedDateChange = (date: Date | null) => {
+        setSharedSelectedDate(date);
+    };
+
     const handleCreateNewTemplate = () => {
         // Create a new empty layout
         const newLayout = useNewLayout();
@@ -143,38 +191,6 @@ export default function ActivityScreen() {
         router.push(`/modals/editLayout?layoutId=${newLayout.id}`);
     };
 
-    // Generate display name for recent workouts
-    const getRecentWorkoutName = (layout: any, routine: any) => {
-        // Use routine's displayName if available (for finished routines with smart naming)
-        if (routine?.displayName) {
-            return routine.displayName;
-        }
-
-        const layoutName = layout?.name || 'Workout';
-
-        // Otherwise, format with relative dates for recent workouts
-        if (routine?.lastStartTime) {
-            const date = new Date(routine.lastStartTime);
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-
-            let dateString;
-            if (date.toDateString() === today.toDateString()) {
-                dateString = 'Today';
-            } else if (date.toDateString() === yesterday.toDateString()) {
-                dateString = 'Yesterday';
-            } else {
-                dateString = date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                });
-            }
-
-            return `${layoutName} - ${dateString}`;
-        }
-        return layoutName;
-    };
 
     const navigation = useNavigation();
 
@@ -196,17 +212,17 @@ export default function ActivityScreen() {
                     </View>
                 );
                 break;
-            case 'recent':
+            case 'workouts':
                 headerLeftComponent = () => (
                     <View style={{ height: 34, justifyContent: 'center', paddingLeft: 8 }}>
-                        <LilButton
-                            height={22}
-                            length="short"
-                            title="Start"
-                            color={color.accent}
-                            textColor={color.primaryBackground}
-                            onPress={() => startNewRoutine({ navigationMethod: 'replace' })}
-                        />
+                        <IButton
+                            width={32}
+                            height={32}
+                            onPress={() => setIsCalendarVisible(true)}
+                            style={{ backgroundColor: 'transparent' }}
+                        >
+                            <Ionicons name="calendar-outline" size={20} color={color.text} />
+                        </IButton>
                     </View>
                 );
                 break;
@@ -218,32 +234,44 @@ export default function ActivityScreen() {
         navigation.setOptions({
             header: () => (
                 <ITopBar
-                    title=""
+                    title={selectedTab === 'workouts' ? selectedDate : ''}
                     headerLeft={headerLeftComponent}
-                    headerRight={() => (
-                        <View style={{ flexDirection: 'row', gap: 8 }}>
-                            <View style={{ height: 34, justifyContent: 'center' }}>
-                                <LilButton
-                                    height={22}
-                                    length="short"
-                                    title={isSelecting ? "Cancel" : "Select"}
-                                    color={isSelecting ? color.accent : color.primaryBackground}
-                                    textColor={isSelecting ? color.primaryBackground : color.accent}
-                                    onPress={() => {
-                                        setIsSelecting(!isSelecting);
-                                        if (isSelecting) setSelectedItems(new Set());
-                                    }}
-                                />
+                    headerRight={() => {
+                        // For workouts tab, only show X button
+                        if (selectedTab === 'workouts') {
+                            return (
+                                <IButton width={34} height={34} onPress={() => router.back()}>
+                                    <Ionicons name="close" size={24} color={color.text} />
+                                </IButton>
+                            );
+                        }
+
+                        // For other tabs, show Select and X buttons
+                        return (
+                            <View style={{ flexDirection: 'row', gap: 8 }}>
+                                <View style={{ height: 34, justifyContent: 'center' }}>
+                                    <LilButton
+                                        height={22}
+                                        length="short"
+                                        title={isSelecting ? "Cancel" : "Select"}
+                                        color={isSelecting ? color.accent : color.primaryBackground}
+                                        textColor={isSelecting ? color.primaryBackground : color.accent}
+                                        onPress={() => {
+                                            setIsSelecting(!isSelecting);
+                                            if (isSelecting) setSelectedItems(new Set());
+                                        }}
+                                    />
+                                </View>
+                                <IButton width={34} height={34} onPress={() => router.back()}>
+                                    <Ionicons name="close" size={24} color={color.text} />
+                                </IButton>
                             </View>
-                            <IButton width={34} height={34} onPress={() => router.back()}>
-                                <Ionicons name="close" size={24} color={color.text} />
-                            </IButton>
-                        </View>
-                    )}
+                        );
+                    }}
                 />
             )
         });
-    }, [selectedTab, color, navigation, handleCreateNewTemplate, startNewRoutine, isSelecting]);
+    }, [selectedTab, color, navigation, handleCreateNewTemplate, startNewRoutine, isSelecting, selectedDate]);
 
     useEffect(() => {
         setSelectedItems(new Set());
@@ -257,6 +285,7 @@ export default function ActivityScreen() {
             setAnchorId(null);
         }
     }, [isSelecting]);
+
 
     const toggleSelect = (id: string) => {
         const newSelected = new Set(selectedItems);
@@ -286,122 +315,37 @@ export default function ActivityScreen() {
             >
                 {/* Content Sections */}
                 {selectedTab === 'templates' && (
-                    <>
-                        <IList label="" background="transparent" width={'90%'} hrStart="None" >
-                            {templateLayouts.length > 0 ? (
-                                templateLayouts.map((layout) => (
-                                    <TemplateCard
-                                        key={layout.id}
-                                        layout={layout}
-                                        showFavorite={false}
-                                        showActions={true}
-                                        showEdit={true}
-                                        showDateTime={false}
-                                        isFavorite={isSaved(layout.id)}
-                                        onPress={() => startRoutine(layout)}
-                                        onToggleFavorite={() => toggleSaved(layout.id)}
-                                        onEdit={() => router.push(`/modals/editLayout?layoutId=${layout.id}`)}
-                                        onDelete={() => handleDeleteLayout(layout)}
-                                        isSelecting={isSelecting}
-                                        selected={selectedItems.has(layout.id)}
-                                        onSelect={toggleSelect}
-                                        bubbleAnchorRef={!isSelecting && anchorId === layout.id ? bubbleRef : undefined}
-                                    />
-                                ))
-                            ) : (
-                                <Container width={"90%"} style={{ marginVertical: 8 }}>
-                                    <EmptyState
-                                        icon="document-outline"
-                                        title="No templates yet"
-                                        subtitle="Create a workout to generate templates"
-                                    />
-                                </Container>
-                            )}
-                        </IList>
-                    </>
+                    <TemplatesTab
+                        templateLayouts={templateLayouts}
+                        isSelecting={isSelecting}
+                        selectedItems={selectedItems}
+                        onSelect={toggleSelect}
+                        onToggleSaved={toggleSaved}
+                        isSaved={isSaved}
+                        onStartRoutine={handleStartLayout}
+                        onEditLayout={(layout) => router.push(`/modals/editLayout?layoutId=${layout.id}`)}
+                        onDeleteLayout={handleDeleteLayout}
+                        bubbleRef={bubbleRef}
+                        anchorId={anchorId || undefined}
+                    />
                 )}
 
-                {selectedTab === 'recent' && (
-                    <>
-                        {recentRoutines.length > 0 ? (
-                            (() => {
-                                // Group routines by date
-                                const groupedRoutines: { [key: string]: any[] } = {};
-                                recentRoutines.forEach((routine) => {
-                                    if (routine.lastStartTime) {
-                                        const date = new Date(routine.lastStartTime);
-                                        const dateKey = date.toDateString();
-                                        if (!groupedRoutines[dateKey]) {
-                                            groupedRoutines[dateKey] = [];
-                                        }
-                                        groupedRoutines[dateKey].push(routine);
-                                    }
-                                });
-
-                                // Render grouped routines as separate lists
-                                const renderedLists: JSX.Element[] = [];
-                                Object.keys(groupedRoutines).sort((a, b) => new Date(b).getTime() - new Date(a).getTime()).forEach((dateKey, index) => {
-                                    const date = new Date(dateKey);
-                                    const today = new Date();
-                                    const yesterday = new Date(today);
-                                    yesterday.setDate(today.getDate() - 1);
-
-                                    let dateLabel;
-                                    if (date.toDateString() === today.toDateString()) {
-                                        dateLabel = 'Today';
-                                    } else if (date.toDateString() === yesterday.toDateString()) {
-                                        dateLabel = 'Yesterday';
-                                    } else {
-                                        dateLabel = date.toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            month: 'short',
-                                            day: 'numeric'
-                                        });
-                                    }
-
-                                    renderedLists.push(
-                                        <IList key={dateKey} label={dateLabel} background="transparent" width={'90%'} hrStart="None">
-                                            {groupedRoutines[dateKey].map((routine) => {
-                                                const layout = allLayouts.find(l => l.id === routine.layoutId);
-                                                if (!layout) return null;
-                                                return (
-                                                    <RoutineCard
-                                                        key={routine.id}
-                                                        layout={layout}
-                                                        customName={getRecentWorkoutName(layout, routine)}
-                                                        showFavorite={false}
-                                                        showActions={true}
-                                                        showEdit={false}
-                                                        showDateTime={true}
-                                                        isFavorite={isSaved(layout.id)}
-                                                        onPress={() => router.push(`/modals/workoutRecap?routineId=${routine.id}&layoutId=${layout.id}`)}
-                                                        onToggleFavorite={() => toggleSaved(layout.id)}
-                                                        onDelete={() => handleDeleteRecent(routine)}
-                                                        isSelecting={isSelecting}
-                                                        selected={selectedItems.has(layout.id)}
-                                                        onSelect={toggleSelect}
-                                                        bubbleAnchorRef={!isSelecting && anchorId === routine.id ? bubbleRef : undefined}
-                                                    />
-                                                );
-                                            })}
-                                        </IList>
-                                    );
-                                });
-
-                                return renderedLists;
-                            })()
-                        ) : (
-                            <Container width={"90%"} style={{ marginVertical: 8 }}>
-                                <EmptyState
-                                    icon="fitness-outline"
-                                    title="No recent workouts yet"
-                                    subtitle="Complete a workout to see it here"
-                                    buttonText="Quick Start"
-                                    onButtonPress={() => startNewRoutine({ navigationMethod: 'replace' })}
-                                />
-                            </Container>
-                        )}
-                    </>
+                {selectedTab === 'workouts' && (
+                    <View style={{ marginBottom: 12 }}>
+                        <WorkoutsTab
+                            isSelecting={isSelecting}
+                            selectedItems={selectedItems}
+                            onSelect={toggleSelect}
+                            onDeleteRecent={handleDeleteRecent}
+                            bubbleAnchorRef={bubbleRef}
+                            anchorId={anchorId}
+                            onDateChange={(dateLabel, dateObj) => handleDateChange(dateLabel, dateObj)}
+                            navigateToDate={navigateToDate}
+                            onGetCurrentDate={handleGetCurrentDate}
+                            sharedSelectedDate={sharedSelectedDate}
+                            onSharedDateChange={handleSharedDateChange}
+                        />
+                    </View>
                 )}
 
                 {selectedTab === 'saved' && (
@@ -490,7 +434,7 @@ export default function ActivityScreen() {
                             height={40}
                             title={deleteItems.length > 0 ? `Delete ${deleteItems.length}` : "Delete"}
                             color={color.error}
-                            textColor={color.primaryBackground}
+                            textColor={color.secondaryText}
                             onPress={handleConfirmDelete}
                         />
                     </View>
@@ -535,7 +479,7 @@ export default function ActivityScreen() {
                             height={40}
                             title={"Delete"}
                             color={color.error}
-                            textColor={color.primaryBackground}
+                            textColor={color.secondaryText}
                             onPress={handleConfirmDelete}
                         />
 
@@ -550,6 +494,72 @@ export default function ActivityScreen() {
                     </View>
                 </Container>
             </IBubble>
+
+            {/* Start Confirmation Bubble */}
+            <IBubble
+                visible={bubbleVisible && startLayout}
+                onClose={handleCancelStart}
+                height={height}
+                width={width}
+                top={top}
+                left={left}
+                size={IBubbleSize.large}
+            >
+                <Container width={"90%"} height={"100%"} direction="column">
+                    <Text style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: color.text,
+                        textAlign: "center",
+                        marginBottom: 12
+                    }}>
+                        Are you sure about that?
+                    </Text>
+
+                    <Text style={{
+                        fontSize: 13,
+                        color: color.grayText,
+                        textAlign: "center",
+                        marginBottom: 16,
+                        lineHeight: 18
+                    }}>
+                        Start a new workout using "{startLayout?.name || 'this template'}"?
+                    </Text>
+
+                    <View style={{ gap: 10 }}>
+                        <IButton
+                            width={"100%"}
+                            height={40}
+                            title={"Start"}
+                            color={color.accent}
+                            textColor={color.secondaryText}
+                            onPress={() => {
+                                startRoutine(startLayout);
+                                handleCancelStart();
+                            }}
+                        />
+
+                        <IButton
+                            width={"100%"}
+                            height={40}
+                            title={"Cancel"}
+                            color={color.primaryBackground}
+                            textColor={color.accent}
+                            onPress={handleCancelStart}
+                        />
+                    </View>
+                </Container>
+            </IBubble>
+
+            {/* Full Calendar Modal */}
+            <FullCalendar
+                visible={isCalendarVisible}
+                onClose={() => setIsCalendarVisible(false)}
+                onDateSelect={handleCalendarDateSelect}
+                selectedDate={sharedSelectedDate || undefined}
+                sharedSelectedDate={sharedSelectedDate}
+                onSharedDateChange={handleSharedDateChange}
+            />
         </View>
     );
 }
@@ -564,7 +574,6 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingBottom: 66,
         paddingTop: 32,
-        gap: 12,
     },
     bottomTabContainer: {
         position: 'absolute',

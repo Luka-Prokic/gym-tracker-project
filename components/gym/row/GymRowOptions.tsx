@@ -39,7 +39,7 @@ const GymRowOptions: React.FC<GymRowOptionsProps> = ({ exerciseId, index, set, c
             onPress={() => deleteRow(index)}
         >
             <Text
-                style={styles.optionText}
+                style={[styles.optionText, { color: color.secondaryText }]}
             >
                 Delete
             </Text>

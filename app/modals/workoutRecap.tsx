@@ -89,14 +89,14 @@ export default function WorkoutRecap() {
 
     const handleConfirmTemplate = () => {
         if (!layout || !routine) return;
-        
+
         // Clone the layout for the template
         const clonedLayout = useCloneLayout({ layout, existingLayouts: layouts });
         clonedLayout.name = templateName;
-        
+
         // Save the cloned layout
         saveLayout(clonedLayout);
-        
+
         // Create a new template routine
         const templateRoutineId = "template_" + Date.now();
         const templateRoutine = {
@@ -107,11 +107,11 @@ export default function WorkoutRecap() {
             type: "gym" as const,
             isFinished: false,
         };
-        
+
         checkAndAddRoutine(templateRoutine);
         setShowTemplateSlide(false);
         setTemplateName('');
-        
+
         // Navigate to Templates tab in ActivityScreen
         router.replace('/routines?tab=templates');
     };
@@ -159,9 +159,13 @@ export default function WorkoutRecap() {
                 />
             </ISlide>
 
-            <ScrollView style={[styles.container, { backgroundColor: color.background }]}>
+            <ScrollView 
+                style={[styles.scrollContainer, { backgroundColor: color.background }]} 
+                contentContainerStyle={styles.container}
+                showsVerticalScrollIndicator={false}
+            >
                 <Text style={[styles.title, { color: color.text }]}>
-                    {routine.displayName || 'Workout Recap'}
+                    {layout.name || 'Workout Recap'}
                 </Text>
                 <View style={styles.headerInfo}>
                     <Text style={[styles.infoText, { color: color.grayText }]}>
@@ -229,21 +233,24 @@ export default function WorkoutRecap() {
 }
 
 const styles = StyleSheet.create({
-    container: {
+    scrollContainer: {
         flex: 1,
+    },
+    container: {
         paddingVertical: 44,
+        alignItems: "center",
     },
     title: {
-        fontSize: 24,
+        fontSize: 32,
         fontWeight: 'bold',
         marginBottom: 8,
-        marginHorizontal: "5%",
+        width: "90%",
     },
     headerInfo: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 16,
-        marginHorizontal: "5%",
+        width: "90%",
     },
     infoText: {
         fontSize: 14,

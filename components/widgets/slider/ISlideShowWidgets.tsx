@@ -65,8 +65,6 @@ const ISlideShowWidgets: React.FC<ISlideWidgetsProps> = ({ visible, onClose }) =
                     bounces={true}
                     style={[
                         {
-                            paddingTop: 88,
-                            paddingBottom: 88,
                             overflowX: "visible",
                             width: "100%",
                             borderColor: "transparent",
@@ -74,6 +72,10 @@ const ISlideShowWidgets: React.FC<ISlideWidgetsProps> = ({ visible, onClose }) =
                             borderWidth: 1,
                         },
                     ]}
+                    contentContainerStyle={{
+                        paddingTop: 88,
+                        paddingBottom: 88,
+                    }}
                 >
                     {isWidgets ?
                         <List style={styles.addContainer as ViewStyle} width={"90%"}>

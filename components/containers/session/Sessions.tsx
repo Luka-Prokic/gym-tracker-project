@@ -99,7 +99,7 @@ const Sessions: React.FC<ISessionsProps> = ({
                     />
                     <SettingsButton
                         title={'Delete Group'} height={34} color={colors.error}
-                        icon={<Ionicons name="trash-bin" size={18} color={colors.error} />}
+                        icon={<Ionicons name="trash-bin" size={18} color={colors.secondaryText} />}
                     />
                 </List>
             </ISlide >

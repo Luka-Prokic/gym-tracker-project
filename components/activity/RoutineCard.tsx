@@ -9,6 +9,7 @@ import { Layout } from '../context/ExerciseLayoutZustand';
 import { isGymExercise } from '../context/utils/GymUtils';
 import { useRoutine } from '../context/RoutineZustand';
 import hexToRGBA from '../../assets/hooks/HEXtoRGB';
+import { useBodyParts } from '../../hooks/useBodyParts';
 
 
 interface RoutineCardProps {
@@ -51,6 +52,17 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const { routines } = useRoutine();
+    const bodyParts = useBodyParts(layout);
+
+    // Glass background colors similar to ISlide
+    const glassBackgroundColor = {
+        light: "rgba(255, 255, 255, 0.5)",
+        peachy: "rgba(255, 242, 252, 0.5)",
+        oldschool: "rgba(255, 255, 255, 0.5)",
+        dark: "rgba(150, 150, 150, 0.5)",
+        preworkout: "rgba(169, 169, 140, 0.5)",
+        Corrupted: "rgba(115, 98, 98, 0.69)",
+    }[theme as Themes];
 
     const getRoutineTitle = (layout: Layout) => {
         // Use custom name if provided (for recent workouts), otherwise use layout name
@@ -65,29 +77,18 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
     const getRoutineStats = (layout: Layout) => {
         if (showDateTime) {
-            // Extract creation date from layout ID (format: "gym_" + timestamp)
+            // Extract start time from layout ID (format: "gym_" + timestamp)
             const timestampMatch = layout.id.match(/gym_(\d+)/);
             if (timestampMatch) {
                 const timestamp = parseInt(timestampMatch[1]);
                 const date = new Date(timestamp);
-                const now = new Date();
-                const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-
-                if (diffInHours < 24) {
-                    // Today - show time
-                    return date.toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                    });
-                } else {
-                    // Older - show date
-                    return date.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        ...(date.getFullYear() !== now.getFullYear() && { year: 'numeric' })
-                    });
-                }
+                
+                // Always show start time in 24-hour format
+                return date.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
             }
         }
 
@@ -111,10 +112,11 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     return (
         <Container width={"100%"} style={styles.routineCard}>
             <Pressable
-                style={[styles.cardContent, { backgroundColor: hexToRGBA(color.primaryBackground, 0.8) }]}
+                style={[styles.cardContent, { backgroundColor: glassBackgroundColor }]}
                 onPress={handleCardPress}
             >
-                <View style={styles.cardHeader}>
+                {/* Main content area */}
+                <View style={styles.mainContent}>
                     {isSelecting && (
                         <IButton width={40} height={40} onPress={() => onSelect?.(layout.id)}>
                             <Ionicons 
@@ -125,54 +127,71 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                         </IButton>
                     )}
                     <View style={styles.cardInfo}>
-                        <Text style={[styles.routineTitle, { color: color.text }]} numberOfLines={2}>
+                        <Text style={[styles.routineTitle, { color: color.text }]} numberOfLines={1} ellipsizeMode="tail">
                             {title}
                         </Text>
                         <View style={styles.statsContainer}>
-                            <Text style={[styles.routineStats, { color: color.grayText }]}>
+                            <Text style={[styles.routineStats, { color: color.text }]}>
                                 {stats}
                             </Text>
-                            <Text style={[styles.statusBadge, { 
-                                color: status === 'template' ? color.accent : color.tint,
-                                backgroundColor: hexToRGBA(status === 'template' ? color.accent : color.tint, 0.1)
-                            }]}>
-                                {status}
-                            </Text>
-                        </View>
-                    </View>
-                    <View style={styles.cardActions}>
-                        {showFavorite && (
-                            <IButton width={40} height={40} onPress={onToggleFavorite} disabled={!!isSelecting}>
-                                <Ionicons
-                                    name={isFavorite ? "bookmark" : "bookmark-outline"}
-                                    size={24}
-                                    color={isFavorite ? color.accent : color.grayText}
-                                />
-                            </IButton>
-                        )}
-                        {showActions && (
-                            <View style={styles.actionsContainer}>
-                                {showEdit && (
-                                    <IButton width={32} height={32} onPress={onEdit} disabled={!!isSelecting}>
-                                        <Ionicons name="create-outline" size={18} color={color.accent} />
-                                    </IButton>
+                            <View style={styles.bodyPartsTags}>
+                                {bodyParts.slice(0, 3).map((bodyPart, index) => (
+                                    <Text
+                                        key={index}
+                                        style={[styles.statusBadge, {
+                                            color: status === 'template' ? color.accent : color.tint,
+                                            backgroundColor: hexToRGBA(status === 'template' ? color.accent : color.tint, 0.1)
+                                        }]}
+                                    >
+                                        {bodyPart.name}
+                                    </Text>
+                                ))}
+                                {bodyParts.length > 3 && (
+                                    <Text
+                                        style={[styles.statusBadge, {
+                                            color: status === 'template' ? color.accent : color.tint,
+                                            backgroundColor: hexToRGBA(status === 'template' ? color.accent : color.tint, 0.1)
+                                        }]}
+                                    >
+                                        ...
+                                    </Text>
                                 )}
-                                <IButton ref={bubbleAnchorRef as any} width={32} height={32} onPress={onDelete} disabled={!!isSelecting}>
-                                    <Ionicons
-                                        name={savedContext ? "bookmark" : "trash-outline"}
-                                        size={18}
-                                        color={color.error}
-                                    />
-                                </IButton>
                             </View>
-                        )}
+                        </View>
+
                     </View>
+                    {showFavorite && (
+                        <IButton width={40} height={40} onPress={onToggleFavorite} disabled={!!isSelecting}>
+                            <Ionicons
+                                name={isFavorite ? "bookmark" : "bookmark-outline"}
+                                size={24}
+                                color={isFavorite ? color.accent : color.grayText}
+                            />
+                        </IButton>
+                    )}
                 </View>
-                <View style={styles.cardFooter}>
-                    <View style={[styles.difficultyIndicator, { backgroundColor: color.accent }]} />
-                    <Text style={[styles.startText, { color: color.accent }]}>
-                        Tap to recap
-                    </Text>
+
+                {/* Bottom left corner - Delete button */}
+                {showActions && (
+                    <View style={styles.bottomLeftButton}>
+                        <IButton ref={bubbleAnchorRef as any} width={32} height={32} onPress={onDelete} disabled={!!isSelecting}>
+                            <Ionicons
+                                name={savedContext ? "bookmark" : "trash-outline"}
+                                size={18}
+                                color={color.error}
+                            />
+                        </IButton>
+                    </View>
+                )}
+
+                {/* Bottom right corner - Tap to recap button */}
+                <View style={styles.bottomRightButton}>
+                    <View style={styles.cardFooter}>
+                        <View style={[styles.difficultyIndicator, { backgroundColor: color.accent }]} />
+                        <Text style={[styles.startText, { color: color.accent }]}>
+                            Tap to recap
+                        </Text>
+                    </View>
                 </View>
             </Pressable>
         </Container>
@@ -182,57 +201,72 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 const styles = StyleSheet.create({
     routineCard: {
         marginBottom: 8,
+        width: '100%',
     },
     cardContent: {
         borderRadius: 12,
         padding: 16,
-        height: 132,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        height: 264,
+        width: '100%',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 3,
+        position: 'relative',
+        backdropFilter: 'blur(20px)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
-    cardHeader: {
+    mainContent: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: 8,
+        marginBottom: 40, // Space for bottom left button
     },
     cardInfo: {
         flex: 1,
         marginRight: 8,
     },
-    cardActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
+    bottomLeftButton: {
+        position: 'absolute',
+        bottom: 16,
+        left: 16,
+        zIndex: 1,
     },
-    actionsContainer: {
-        flexDirection: 'row',
-        gap: 4,
+    bottomRightButton: {
+        position: 'absolute',
+        bottom: 16,
+        right: 16,
+        zIndex: 1,
     },
     routineTitle: {
-        fontSize: 17,
+        fontSize: 32,
         fontWeight: '600',
-        marginBottom: 2,
-        lineHeight: 22,
+        marginBottom: 8,
+        lineHeight: 38,
     },
     statsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
+        marginBottom: 16,
     },
     routineStats: {
         fontSize: 13,
         fontWeight: '400',
     },
     statusBadge: {
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: '600',
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 8,
         textTransform: 'uppercase',
+    },
+    bodyPartsTags: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
     },
     cardFooter: {
         flexDirection: 'row',

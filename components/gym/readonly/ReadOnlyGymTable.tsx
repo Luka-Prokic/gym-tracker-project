@@ -145,7 +145,7 @@ export const ReadOnlyGymTable: React.FC<ReadOnlyGymTableProps> = ({ exerciseId, 
 
 const styles = StyleSheet.create({
     container: {
-        width: "100%",
+        width: "90%",
         marginBottom: 16,
     },
     exerciseName: {
