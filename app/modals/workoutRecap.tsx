@@ -134,7 +134,16 @@ export default function WorkoutRecap() {
                 </Text>
                 <Container width="90%" style={styles.nameContainer}>
                     <TextInput
-                        style={[styles.nameInput, { color: color.text, borderColor: color.handle }]}
+                        style={[styles.nameInput, {
+                            height: 44,
+                            borderWidth: 1,
+                            borderColor: color.border,
+                            borderRadius: 10,
+                            paddingHorizontal: 16,
+                            fontSize: 16,
+                            color: color.text,
+                            backgroundColor: color.background
+                        }]}
                         value={templateName}
                         onChangeText={setTemplateName}
                         placeholder="Enter template name"
@@ -159,8 +168,8 @@ export default function WorkoutRecap() {
                 />
             </ISlide>
 
-            <ScrollView 
-                style={[styles.scrollContainer, { backgroundColor: color.background }]} 
+            <ScrollView
+                style={[styles.scrollContainer, { backgroundColor: color.background }]}
                 contentContainerStyle={styles.container}
                 showsVerticalScrollIndicator={false}
             >

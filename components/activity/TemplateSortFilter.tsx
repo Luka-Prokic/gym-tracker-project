@@ -16,7 +16,7 @@ interface TemplateSortFilterProps {
 
 const SORT_MODES: { value: SortMode; label: string }[] = [
     { value: 'date', label: 'Date' },
-    { value: 'name', label: 'Name (A-Z)' },
+    { value: 'name', label: 'Name' },
 ];
 
 export const TemplateSortFilter: React.FC<TemplateSortFilterProps> = ({ value, onPress }) => {
@@ -32,7 +32,7 @@ export const TemplateSortFilter: React.FC<TemplateSortFilterProps> = ({ value, o
         <>
             <ISlide visible={bubbleVisible} onClose={popBubble} size="medium">
                 <Text style={{ fontSize: 18, fontWeight: "bold", color: color.text }}>
-                    Sort Templates
+                    Sort By
                 </Text>
                 <HR />
                 <ScrollView

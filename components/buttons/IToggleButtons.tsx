@@ -20,6 +20,7 @@ interface IToggleButtonProps {
     width?: DimensionValue;
     height?: DimensionValue;
     style?: ViewStyle;
+    backgroundColor?: string;
 }
 
 const IToggleButton: React.FC<IToggleButtonProps> = ({
@@ -30,6 +31,7 @@ const IToggleButton: React.FC<IToggleButtonProps> = ({
     width = 144,
     height = 44,
     style,
+    backgroundColor,
 }) => {
     const animation = useRef(new Animated.Value(value === option1 ? 0 : 1)).current;
     const { theme } = useTheme();
@@ -63,7 +65,7 @@ const IToggleButton: React.FC<IToggleButtonProps> = ({
                     width,
                     height,
                     borderRadius: height as number / 2,
-                    backgroundColor: color.handle,
+                    backgroundColor: backgroundColor ?? color.handle,
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.1,
                     shadowRadius: 4,

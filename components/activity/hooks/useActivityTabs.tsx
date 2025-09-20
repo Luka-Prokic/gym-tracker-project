@@ -1,14 +1,14 @@
 import { useState } from 'react';
 
-export type ActivityTab = 'templates' | 'workouts' | 'saved';
+export type ActivityTab = 'templates' | 'workouts' | 'splits';
 
 export const useActivityTabs = (initialTab: ActivityTab = 'templates') => {
     const [selectedTab, setSelectedTab] = useState<ActivityTab>(initialTab);
 
     const tabs = [
-        { id: 'templates' as ActivityTab, label: 'Templates', icon: 'document-outline' },
+        { id: 'templates' as ActivityTab, label: 'Templates', icon: 'extension-puzzle-outline' },
         { id: 'workouts' as ActivityTab, label: 'Workouts', icon: 'calendar-number-outline' },
-        { id: 'saved' as ActivityTab, label: 'Saved', icon: 'bookmark-outline' }
+        { id: 'splits' as ActivityTab, label: 'Splits', icon: 'flash-outline' }
     ];
 
     return {

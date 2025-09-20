@@ -449,6 +449,12 @@ export default function WorkoutsTab({
             {hasNoWorkoutsToday && (
                 <Container width={"90%"} style={styles.quickStartContainer}>
                     <View style={styles.quickStartTextContainer}>
+                        <Ionicons 
+                            name="sad-outline" 
+                            size={48} 
+                            color={color.grayText} 
+                            style={{ marginBottom: 8 }}
+                        />
                         <Text style={[styles.quickStartTitle, { color: color.text }]}>
                             Still waiting?
                         </Text>
@@ -471,6 +477,12 @@ export default function WorkoutsTab({
             {hasNoWorkoutsOtherDay && (
                 <Container width={"90%"} style={styles.noWorkoutContainer}>
                     <View style={styles.noWorkoutTextContainer}>
+                        <Ionicons 
+                            name="rainy-outline" 
+                            size={48} 
+                            color={color.grayText} 
+                            style={{ marginBottom: 8 }}
+                        />
                         <Text style={[styles.noWorkoutTitle, { color: color.text }]}>
                             Rest day
                         </Text>

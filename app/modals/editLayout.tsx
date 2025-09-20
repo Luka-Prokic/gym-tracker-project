@@ -13,8 +13,9 @@ export default function EditLayoutScreen() {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
 
-    const { layoutId: rawLayoutId } = useLocalSearchParams<{ layoutId?: string }>();
+    const { layoutId: rawLayoutId, mode: rawMode } = useLocalSearchParams<{ layoutId?: string; mode?: string }>();
     const sourceLayoutId = typeof rawLayoutId === "string" ? rawLayoutId : undefined;
+    const isCreateMode = rawMode === "create";
 
     const { getLayout, saveLayout, removeLayout, addToSaved, updateLayoutName, startEditingLayout, commitStagingLayout, discardStagingLayout, layouts } = useExerciseLayout();
     const { routines, checkAndAddRoutine, setActiveRoutine, clearActiveRoutineOnly } = useRoutine();
@@ -67,6 +68,11 @@ export default function EditLayoutScreen() {
             // On unmount, discard any uncommitted changes
             if (targetLayoutId) {
                 discardStagingLayout(targetLayoutId);
+                
+                // In create mode, also remove the layout if user navigates away without saving
+                if (isCreateMode) {
+                    removeLayout(targetLayoutId);
+                }
             }
             clearActiveRoutineOnly();
         };
@@ -78,9 +84,14 @@ export default function EditLayoutScreen() {
         // Discard all staging changes
         discardStagingLayout(editingLayoutId);
         
-        // If we created a clone for editing, remove it
-        if (clonedLayoutId) {
-            removeLayout(clonedLayoutId);
+        if (isCreateMode) {
+            // In create mode: delete the layout completely since it was never properly saved
+            removeLayout(editingLayoutId);
+        } else {
+            // In edit mode: if we created a clone for editing, remove it
+            if (clonedLayoutId) {
+                removeLayout(clonedLayoutId);
+            }
         }
 
         router.back();
@@ -91,7 +102,12 @@ export default function EditLayoutScreen() {
 
         // Commit all staging changes to storage
         commitStagingLayout(editingLayoutId);
-        
+
+        // In create mode, add the layout to saved templates
+        if (isCreateMode) {
+            addToSaved(editingLayoutId);
+        }
+
         router.back();
     };
 

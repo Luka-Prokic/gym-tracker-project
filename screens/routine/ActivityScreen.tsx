@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Text, Dimensions } from 'react-native';
+import { StyleSheet, ScrollView, View, Text, Dimensions, TextInput } from 'react-native';
 import { useTheme } from '../../components/context/ThemeContext';
 import Colors, { Themes } from '../../constants/Colors';
 import List from '../../components/containers/List';
 import Container from '../../components/containers/Container';
 import IButton from '../../components/buttons/IButton';
+import OptionButton from '../../components/buttons/OptionButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useStartNewRoutine } from '../../assets/hooks/useStartNewRoutine';
 import IBubble, { IBubbleSize } from '../../components/bubbles/IBubble';
 import ISlide from '../../components/bubbles/ISlide';
 import useBubbleLayout from '../../components/bubbles/hooks/useBubbleLayout';
-import { useExerciseLayout } from '../../components/context/ExerciseLayoutZustand';
+import { useExerciseLayout, Layout } from '../../components/context/ExerciseLayoutZustand';
 import { useNewLayout } from '../../assets/hooks/useNewLayout';
+import useCloneLayout from '../../assets/hooks/useCloneLayout';
 import { useRoutine } from '../../components/context/RoutineZustand';
 import { useNavigation } from '@react-navigation/native';
 import LilButton from '../../components/buttons/LilButton';
@@ -27,6 +29,7 @@ import ComingSoon from '../../components/activity/ComingSoon';
 import TemplateCard from '../../components/activity/TemplateCard';
 import TemplatesTab from '../../components/activity/TemplatesTab';
 import WorkoutsTab from '../../components/activity/WorkoutsTab';
+import SplitsTab from '../../components/activity/SplitsTab';
 import FullCalendar from '../../components/activity/FullCalendar';
 
 // Activity hooks
@@ -39,7 +42,7 @@ export default function ActivityScreen() {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
     const params = useLocalSearchParams();
-    const initialTab = (params.tab as 'templates' | 'workouts' | 'saved') || 'templates';
+    const initialTab = (params.tab as 'templates' | 'workouts' | 'splits') || 'templates';
 
     const tabBackgroundColor = {
         light: "rgba(255, 255, 255, 0.2)",
@@ -65,6 +68,13 @@ export default function ActivityScreen() {
     
     // Start confirmation state
     const [startLayout, setStartLayout] = useState<any>(null);
+
+    // State for edit options popup
+    const [editOptionsLayout, setEditOptionsLayout] = useState<Layout | null>(null);
+    
+    // State for clone popup
+    const [cloneLayout, setCloneLayout] = useState<Layout | null>(null);
+    const [cloneName, setCloneName] = useState('');
     const [isSelecting, setIsSelecting] = useState(false);
     const [selectedItems, setSelectedItems] = useState(new Set<string>());
     const [deleteItems, setDeleteItems] = useState<string[]>([]);
@@ -97,7 +107,7 @@ export default function ActivityScreen() {
                 });
             } else if (selectedTab === 'workouts') {
                 deleteItems.forEach(id => removeRoutine(id));
-            } else if (selectedTab === 'saved') {
+            } else if (selectedTab === 'splits') {
                 deleteItems.forEach(id => removeFromSaved(id));
             }
             setDeleteItems([]);
@@ -109,7 +119,7 @@ export default function ActivityScreen() {
             setDeleteRoutine(null);
             popBubble();
         } else if (deleteLayout) {
-            if (selectedTab === 'saved') {
+            if (selectedTab === 'splits') {
                 removeFromSaved(deleteLayout.id);
             } else {
                 const { removeLayout } = useExerciseLayout.getState();
@@ -155,6 +165,68 @@ export default function ActivityScreen() {
         setTimeout(() => makeBubble(), 0);
     };
 
+    const handleEditOptions = (layout: Layout) => {
+        setEditOptionsLayout(layout);
+        setAnchorId(layout.id);
+        setTimeout(() => makeBubble(), 0);
+    };
+
+    const handleCancelEditOptions = () => {
+        setEditOptionsLayout(null);
+        setAnchorId(null);
+        popBubble();
+    };
+
+    const handleEditFromOptions = () => {
+        if (editOptionsLayout) {
+            router.push(`/modals/editLayout?layoutId=${editOptionsLayout.id}`);
+            handleCancelEditOptions();
+        }
+    };
+
+    const handleCloneFromOptions = () => {
+        if (editOptionsLayout) {
+            setCloneLayout(editOptionsLayout);
+            setCloneName(generateCloneName(editOptionsLayout.name || 'Untitled', templateLayouts));
+            setAnchorId(editOptionsLayout.id);
+            handleCancelEditOptions(); // Close edit options bubble
+            setTimeout(() => makeBubble(), 0); // Open clone bubble
+        }
+    };
+
+    const handleConfirmClone = () => {
+        if (cloneLayout && cloneName.trim()) {
+            // Create cloned layout with custom name
+            const clonedLayout = useCloneLayout({ 
+                layout: { ...cloneLayout, name: cloneName.trim() }, 
+                existingLayouts: templateLayouts 
+            });
+            
+            // Save the cloned layout
+            saveLayout(clonedLayout);
+            
+            // Reset state and close bubble
+            setCloneLayout(null);
+            setCloneName('');
+            setAnchorId(null);
+            popBubble();
+        }
+    };
+
+    const handleCancelClone = () => {
+        setCloneLayout(null);
+        setCloneName('');
+        setAnchorId(null);
+        popBubble();
+    };
+
+    const handleDeleteFromOptions = () => {
+        if (editOptionsLayout) {
+            handleDeleteLayout(editOptionsLayout);
+            handleCancelEditOptions();
+        }
+    };
+
     const handleCalendarDateSelect = (date: Date) => {
         // Navigate to the selected date in the workouts tab
         setNavigateToDate(date);
@@ -182,13 +254,49 @@ export default function ActivityScreen() {
         setSharedSelectedDate(date);
     };
 
-    const handleCreateNewTemplate = () => {
+    const handleCreateNewTemplate = (templateName?: string) => {
         // Create a new empty layout
         const newLayout = useNewLayout();
-        // Save it to storage
+        // If template name is provided, set it
+        if (templateName) {
+            newLayout.name = templateName;
+        }
+        // Save it to storage temporarily (will be removed if user cancels)
         saveLayout(newLayout);
-        // Navigate to edit layout screen
-        router.push(`/modals/editLayout?layoutId=${newLayout.id}`);
+        // Navigate to edit layout screen with create mode flag
+        router.push(`/modals/editLayout?layoutId=${newLayout.id}&mode=create`);
+    };
+
+    // Helper function to generate unique clone names
+    const generateCloneName = (originalName: string, existingLayouts: Layout[]) => {
+        const baseName = originalName;
+        let counter = 1;
+        let newName = `${baseName} Copy ${counter}`;
+        
+        // Keep incrementing counter until we find a unique name
+        while (existingLayouts.some(layout => layout.name === newName)) {
+            counter++;
+            newName = `${baseName} Copy ${counter}`;
+        }
+        
+        return newName;
+    };
+
+    const handleCloneTemplate = (layout: Layout) => {
+        // Generate unique clone name
+        const cloneName = generateCloneName(layout.name || 'Untitled', templateLayouts);
+        
+        // Create cloned layout
+        const clonedLayout = useCloneLayout({ 
+            layout: { ...layout, name: cloneName }, 
+            existingLayouts: templateLayouts 
+        });
+        
+        // Save the cloned layout
+        saveLayout(clonedLayout);
+        
+        // Navigate to edit the cloned layout
+        router.push(`/modals/editLayout?layoutId=${clonedLayout.id}&mode=create`);
     };
 
 
@@ -201,14 +309,16 @@ export default function ActivityScreen() {
             case 'templates':
                 headerLeftComponent = () => (
                     <View style={{ height: 34, justifyContent: 'center', paddingLeft: 8 }}>
-                        <LilButton
-                            height={22}
-                            length="short"
-                            title="Create"
-                            color={color.accent}
-                            textColor={color.primaryBackground}
-                            onPress={handleCreateNewTemplate}
-                        />
+                        {!isSelecting && (
+                            <LilButton
+                                height={22}
+                                length="short"
+                                title="Create"
+                                color={color.accent}
+                                textColor={color.primaryBackground}
+                                onPress={handleCreateNewTemplate}
+                            />
+                        )}
                     </View>
                 );
                 break;
@@ -226,7 +336,7 @@ export default function ActivityScreen() {
                     </View>
                 );
                 break;
-            case 'saved':
+            case 'splits':
                 // blank for now
                 break;
         }
@@ -325,6 +435,8 @@ export default function ActivityScreen() {
                         onStartRoutine={handleStartLayout}
                         onEditLayout={(layout) => router.push(`/modals/editLayout?layoutId=${layout.id}`)}
                         onDeleteLayout={handleDeleteLayout}
+                        onCreateTemplate={handleCreateNewTemplate}
+                        onEditOptions={handleEditOptions}
                         bubbleRef={bubbleRef}
                         anchorId={anchorId || undefined}
                     />
@@ -348,14 +460,21 @@ export default function ActivityScreen() {
                     </View>
                 )}
 
-                {selectedTab === 'saved' && (
-                    <Container width={"90%"} style={{ marginVertical: 8 }}>
-                        <EmptyState
-                            icon="bookmark-outline"
-                            title="Saved routines"
-                            subtitle="Coming soon..."
-                        />
-                    </Container>
+                {selectedTab === 'splits' && (
+                    <SplitsTab
+                        savedLayouts={savedLayoutsList}
+                        isSelecting={isSelecting}
+                        selectedItems={selectedItems}
+                        onSelect={toggleSelect}
+                        onToggleSaved={toggleSaved}
+                        isSaved={isSaved}
+                        onStartRoutine={handleStartLayout}
+                        onEditLayout={(layout) => router.push(`/modals/editLayout?layoutId=${layout.id}`)}
+                        onDeleteLayout={handleDeleteLayout}
+                        onEditOptions={handleEditOptions}
+                        bubbleRef={bubbleRef}
+                        anchorId={anchorId || undefined}
+                    />
                 )}
 
             </ScrollView>
@@ -470,7 +589,7 @@ export default function ActivityScreen() {
                     }}>
                         {deleteLayout
                             ? `Delete the template "${deleteLayout?.name || 'template'}"? This will permanently remove it from Templates and cannot be undone; your past workouts won't change.`
-                            : `Delete this workout?`}
+                            : `This will permanently remove it from your workout history and cannot be undone. Your logged progress and statistics will be affected.`}
                     </Text>
 
                     <View style={{ gap: 10 }}>
@@ -547,6 +666,137 @@ export default function ActivityScreen() {
                             textColor={color.accent}
                             onPress={handleCancelStart}
                         />
+                    </View>
+                </Container>
+            </IBubble>
+
+            {/* Edit Options Bubble */}
+            <IBubble
+                visible={bubbleVisible && !!editOptionsLayout}
+                onClose={handleCancelEditOptions}
+                height={height}
+                width={width}
+                top={top}
+                left={left}
+                size={IBubbleSize.large}
+            >
+                <Container width={"90%"} height={"100%"} direction="column">
+                    <Text style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: color.text,
+                        textAlign: "center",
+                        marginBottom: 20
+                    }}>
+                        "{editOptionsLayout?.name || 'this template'}"
+                    </Text>
+                    
+                    <View style={{ gap: 12, width: '100%' }}>
+                        <OptionButton
+                            title="Start Workout"
+                            onPress={() => {
+                                if (editOptionsLayout) {
+                                    startRoutine(editOptionsLayout);
+                                    handleCancelEditOptions();
+                                }
+                            }}
+                            icon={<Ionicons name="play" size={20} color={color.accent} />}
+                            color={color.accent}
+                        />
+                        
+                        <OptionButton
+                            title="Edit Template"
+                            onPress={handleEditFromOptions}
+                            icon={<Ionicons name="create-outline" size={20} color={color.text} />}
+                            color={color.text}
+                        />
+                        
+                        <OptionButton
+                            title="Clone Template"
+                            onPress={handleCloneFromOptions}
+                            icon={<Ionicons name="copy-outline" size={20} color={color.text} />}
+                            color={color.text}
+                        />
+                        
+                        <OptionButton
+                            title="Delete Template"
+                            onPress={handleDeleteFromOptions}
+                            icon={<Ionicons name="trash-outline" size={20} color={color.error} />}
+                            color={color.error}
+                        />
+                    </View>
+                </Container>
+            </IBubble>
+
+            {/* Clone Template Bubble */}
+            <IBubble
+                visible={bubbleVisible && !!cloneLayout}
+                onClose={handleCancelClone}
+                height={height}
+                width={width}
+                top={top}
+                left={left}
+                size={IBubbleSize.large}
+            >
+                <Container width={"90%"} height={"100%"} direction="column">
+                    <Text style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: color.text,
+                        textAlign: "center",
+                        marginBottom: 20
+                    }}>
+                        Clone "{cloneLayout?.name || 'this template'}"
+                    </Text>
+                    
+                    <View style={{ gap: 16, width: '100%' }}>
+                        <View>
+                            <TextInput
+                                style={{
+                                    height: 44,
+                                    borderWidth: 1,
+                                    borderColor: color.border,
+                                    borderRadius: 10,
+                                    paddingHorizontal: 16,
+                                    fontSize: 16,
+                                    color: color.text,
+                                    backgroundColor: color.background
+                                }}
+                                value={cloneName}
+                                onChangeText={setCloneName}
+                                placeholder="Enter clone name"
+                                placeholderTextColor={color.secondaryText}
+                                maxLength={50}
+                                autoFocus
+                            />
+                            <Text style={{
+                                fontSize: 12,
+                                color: color.grayText,
+                                marginTop: 4,
+                                textAlign: "center"
+                            }}>
+                                Clone Name
+                            </Text>
+                        </View>
+                        
+                        <View style={{ flexDirection: 'row', gap: 12 }}>
+                            <IButton
+                                height={44}
+                                width="48%"
+                                color={color.thirdBackground}
+                                textColor={color.text}
+                                title="Cancel"
+                                onPress={handleCancelClone}
+                            />
+                            <IButton
+                                height={44}
+                                width="48%"
+                                color={color.accent}
+                                textColor={color.secondaryText}
+                                title="Clone"
+                                onPress={handleConfirmClone}
+                            />
+                        </View>
                     </View>
                 </Container>
             </IBubble>

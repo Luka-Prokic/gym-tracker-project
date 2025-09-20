@@ -24,7 +24,8 @@ interface TemplateCardProps {
     onPress: () => void;
     onToggleFavorite?: () => void;
     onEdit?: () => void;
-    onDelete?: () => void;
+    onClone?: () => void;
+    onEditOptions?: () => void;
     isSelecting?: boolean;
     selected?: boolean;
     onSelect?: (id: string) => void;
@@ -43,7 +44,8 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     onPress,
     onToggleFavorite,
     onEdit,
-    onDelete,
+    onClone,
+    onEditOptions,
     isSelecting,
     selected,
     onSelect,
@@ -97,10 +99,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         }
 
         // Default: show exercise count (including gym exercises, supersets, and cardio)
-        const exerciseCount = layout.layout.filter(ex => 
+        const exerciseCount = layout.layout.filter(ex =>
             isGymExercise(ex) || isSuperSet(ex) || isCardioExercise(ex)
         ).length;
-        
+
         if (exerciseCount === 0) {
             return "no exercises";
         } else if (exerciseCount === 1) {
@@ -117,8 +119,6 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     const handleCardPress = () => {
         if (isSelecting) {
             onSelect?.(layout.id);
-        } else {
-            onEdit?.();
         }
     };
 
@@ -139,9 +139,9 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                             <View style={styles.statsContainer}>
                                 <View style={styles.bodyPartsTags}>
                                     {bodyParts.slice(0, 3).map((bodyPart, index) => (
-                                        <Text 
+                                        <Text
                                             key={index}
-                                            style={[styles.statusBadge, { 
+                                            style={[styles.statusBadge, {
                                                 color: status === 'template' ? color.accent : color.tint,
                                                 backgroundColor: hexToRGBA(status === 'template' ? color.accent : color.tint, 0.1)
                                             }]}
@@ -161,23 +161,17 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                                     )}
                                 </View>
                             </View>
-                            {/* Bottom section with Tap to edit/select and exercise counter */}
+                            {/* Bottom section with exercise counter */}
                             <View style={styles.bottomSection}>
-                                <View style={styles.cardFooter}>
-                                    <View style={[styles.difficultyIndicator, { backgroundColor: color.accent }]} />
-                                    <Text style={[styles.startText, { color: color.accent }]}>
-                                        {isSelecting ? 'Tap to select' : 'Tap to edit'}
-                                    </Text>
-                                </View>
                                 <Text style={[styles.routineStats, { color: color.text }]}>
-                                    {stats}
+                                    {isSelecting ? 'Tap to select' : stats}
                                 </Text>
                             </View>
                         </View>
                     </View>
 
                     {/* Buttons section - 15% width */}
-                    <View style={styles.buttonsSection}>
+                    <View ref={bubbleAnchorRef as any} style={[styles.buttonsSection, { borderColor: color.border }]}>
                         {isSelecting ? (
                             /* Selection mode - only show selection button */
                             <IButton width={40} height={40} onPress={() => onSelect?.(layout.id)}>
@@ -191,7 +185,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                             /* Normal mode - show all other buttons */
                             <>
                                 {showFavorite && (
-                                    <IButton width={40} height={40} onPress={onToggleFavorite}>
+                                    <IButton width={44} height={44} onPress={onToggleFavorite}>
                                         <Ionicons
                                             name={isFavorite ? "bookmark" : "bookmark-outline"}
                                             size={24}
@@ -201,16 +195,15 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                                 )}
                                 {showActions && (
                                     <View style={styles.actionsContainer}>
-                                        <IButton ref={bubbleAnchorRef as any} width={32} height={32} onPress={onDelete}>
-                                            <Ionicons
-                                                name={savedContext ? "bookmark" : "trash-outline"}
-                                                size={18}
-                                                color={color.error}
-                                            />
-                                        </IButton>
-                                        {showEdit && (
-                                            <IButton width={32} height={32} onPress={onPress}>
-                                                <Ionicons name="play" size={18} color={color.accent} />
+                                        {onEditOptions && (
+                                            <IButton width={44} height={"100%"} onPress={onEditOptions}>
+                                                <Text style={{
+                                                    color: color.fourthBackground,
+                                                    fontSize: 44,
+                                                    fontWeight: 'bold',
+                                                    padding: 4,
+                                                    transform: [{ rotate: '90deg' }]
+                                                }}>Edit</Text>
                                             </IButton>
                                         )}
                                     </View>
@@ -226,12 +219,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 
 const styles = StyleSheet.create({
     templateCard: {
-        marginBottom: 8,
         width: '100%',
     },
     cardContent: {
         borderRadius: 12,
-        padding: 16,
         height: 132,
         width: '100%',
         shadowOffset: { width: 0, height: 2 },
@@ -247,27 +238,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         height: '100%',
         alignItems: 'stretch',
+        width: '100%',
     },
     descriptionSection: {
-        width: '85%',
-        paddingRight: 8,
+        flex: 1,
+        padding: 16,
     },
     buttonsSection: {
-        width: '15%',
+        width: 44,
         justifyContent: 'center',
         alignItems: 'center',
         gap: 8,
+        borderLeftWidth: 1,
+        padding: 2,
     },
     cardInfo: {
         flex: 1,
     },
     actionsContainer: {
         flexDirection: 'column',
-        gap: 4,
         alignItems: 'center',
+        height: '100%',
     },
     routineTitle: {
-        fontSize: 22,
+        fontSize: 26,
         fontWeight: '600',
         marginBottom: 8,
         lineHeight: 28,
