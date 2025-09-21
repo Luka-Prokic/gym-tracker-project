@@ -194,7 +194,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                                                     fontWeight: 'bold',
                                                     padding: 4,
                                                     transform: [{ rotate: '90deg' }]
-                                                }}>USE</Text>
+                                                }}>EDIT</Text>
                                             </IButton>
                                         )}
                                     </View>
