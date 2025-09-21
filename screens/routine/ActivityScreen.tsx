@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Text, Dimensions, TextInput } from 'react-native';
+import { StyleSheet, ScrollView, View, Text, TextInput } from 'react-native';
 import { useTheme } from '../../components/context/ThemeContext';
 import Colors, { Themes } from '../../constants/Colors';
-import List from '../../components/containers/List';
 import Container from '../../components/containers/Container';
 import IButton from '../../components/buttons/IButton';
 import OptionButton from '../../components/buttons/OptionButton';
@@ -22,11 +21,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 // Activity components
-import RoutineCard from '../../components/activity/RoutineCard';
 import TabButton from '../../components/activity/TabButton';
-import EmptyState from '../../components/activity/EmptyState';
-import ComingSoon from '../../components/activity/ComingSoon';
-import TemplateCard from '../../components/activity/TemplateCard';
 import TemplatesTab from '../../components/activity/TemplatesTab';
 import WorkoutsTab from '../../components/activity/WorkoutsTab';
 import SplitsTab from '../../components/activity/SplitsTab';
@@ -36,7 +31,6 @@ import FullCalendar from '../../components/activity/FullCalendar';
 import { useRoutineData } from '../../components/activity/hooks/useRoutineData';
 import { useSavedRoutines } from '../../components/activity/hooks/useSavedRoutines';
 import { useActivityTabs } from '../../components/activity/hooks/useActivityTabs';
-import IList from '@/components/containers/IList';
 
 export default function ActivityScreen() {
     const { theme } = useTheme();
@@ -52,26 +46,27 @@ export default function ActivityScreen() {
         preworkout: "rgba(255, 254, 246, 0.2)",
         Corrupted: "rgba(100, 255, 255, 0.2)",
     }[theme as Themes];
+
     const { startNewRoutine } = useStartNewRoutine();
     const { removeFromSaved, saveLayout } = useExerciseLayout();
     const { removeRoutine } = useRoutine();
 
     // Activity hooks
     const { templateLayouts, savedLayoutsList } = useRoutineData();
-    const { savedRoutineLayouts, toggleSaved, isSaved } = useSavedRoutines();
+    const { toggleSaved, isSaved } = useSavedRoutines();
 
     const { selectedTab, setSelectedTab, tabs } = useActivityTabs(initialTab);
 
     // Delete confirmation state
     const [deleteLayout, setDeleteLayout] = useState<any>(null);
     const [deleteRoutine, setDeleteRoutine] = useState<any>(null);
-    
+
     // Start confirmation state
     const [startLayout, setStartLayout] = useState<any>(null);
 
     // State for edit options popup
     const [editOptionsLayout, setEditOptionsLayout] = useState<Layout | null>(null);
-    
+
     // State for clone popup
     const [cloneLayout, setCloneLayout] = useState<Layout | null>(null);
     const [cloneName, setCloneName] = useState('');
@@ -82,11 +77,8 @@ export default function ActivityScreen() {
     const [anchorId, setAnchorId] = useState<string | null>(null);
     const [isSlideVisible, setIsSlideVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string>('');
-    const [selectedDateObj, setSelectedDateObj] = useState<Date | null>(null);
     const [isCalendarVisible, setIsCalendarVisible] = useState(false);
     const [navigateToDate, setNavigateToDate] = useState<Date | null>(null);
-    const [currentWorkoutsTabDate, setCurrentWorkoutsTabDate] = useState<Date | null>(null);
-    const [getCurrentWorkoutsTabDate, setGetCurrentWorkoutsTabDate] = useState<(() => Date | null) | null>(null);
 
     // Shared selected date state for synchronization between FullCalendar and WorkoutsTab
     const [sharedSelectedDate, setSharedSelectedDate] = useState<Date | null>(new Date());
@@ -197,14 +189,14 @@ export default function ActivityScreen() {
     const handleConfirmClone = () => {
         if (cloneLayout && cloneName.trim()) {
             // Create cloned layout with custom name
-            const clonedLayout = useCloneLayout({ 
-                layout: { ...cloneLayout, name: cloneName.trim() }, 
-                existingLayouts: templateLayouts 
+            const clonedLayout = useCloneLayout({
+                layout: { ...cloneLayout, name: cloneName.trim() },
+                existingLayouts: templateLayouts
             });
-            
+
             // Save the cloned layout
             saveLayout(clonedLayout);
-            
+
             // Reset state and close bubble
             setCloneLayout(null);
             setCloneName('');
@@ -237,16 +229,8 @@ export default function ActivityScreen() {
         }, 100);
     };
 
-    const handleDateChange = (dateLabel: string, dateObj?: Date) => {
+    const handleDateChange = (dateLabel: string) => {
         setSelectedDate(dateLabel);
-        if (dateObj) {
-            setSelectedDateObj(dateObj);
-            setCurrentWorkoutsTabDate(dateObj);
-        }
-    };
-
-    const handleGetCurrentDate = (getCurrentDate: () => Date | null) => {
-        setGetCurrentWorkoutsTabDate(() => getCurrentDate);
     };
 
     // Handler for updating shared selected date
@@ -272,33 +256,15 @@ export default function ActivityScreen() {
         const baseName = originalName;
         let counter = 1;
         let newName = `${baseName} Copy ${counter}`;
-        
+
         // Keep incrementing counter until we find a unique name
         while (existingLayouts.some(layout => layout.name === newName)) {
             counter++;
             newName = `${baseName} Copy ${counter}`;
         }
-        
+
         return newName;
     };
-
-    const handleCloneTemplate = (layout: Layout) => {
-        // Generate unique clone name
-        const cloneName = generateCloneName(layout.name || 'Untitled', templateLayouts);
-        
-        // Create cloned layout
-        const clonedLayout = useCloneLayout({ 
-            layout: { ...layout, name: cloneName }, 
-            existingLayouts: templateLayouts 
-        });
-        
-        // Save the cloned layout
-        saveLayout(clonedLayout);
-        
-        // Navigate to edit the cloned layout
-        router.push(`/modals/editLayout?layoutId=${clonedLayout.id}&mode=create`);
-    };
-
 
     const navigation = useNavigation();
 
@@ -432,9 +398,6 @@ export default function ActivityScreen() {
                         onSelect={toggleSelect}
                         onToggleSaved={toggleSaved}
                         isSaved={isSaved}
-                        onStartRoutine={handleStartLayout}
-                        onEditLayout={(layout) => router.push(`/modals/editLayout?layoutId=${layout.id}`)}
-                        onDeleteLayout={handleDeleteLayout}
                         onCreateTemplate={handleCreateNewTemplate}
                         onEditOptions={handleEditOptions}
                         bubbleRef={bubbleRef}
@@ -443,21 +406,18 @@ export default function ActivityScreen() {
                 )}
 
                 {selectedTab === 'workouts' && (
-                    <View style={{ marginBottom: 12 }}>
-                        <WorkoutsTab
-                            isSelecting={isSelecting}
-                            selectedItems={selectedItems}
-                            onSelect={toggleSelect}
-                            onDeleteRecent={handleDeleteRecent}
-                            bubbleAnchorRef={bubbleRef}
-                            anchorId={anchorId}
-                            onDateChange={(dateLabel, dateObj) => handleDateChange(dateLabel, dateObj)}
-                            navigateToDate={navigateToDate}
-                            onGetCurrentDate={handleGetCurrentDate}
-                            sharedSelectedDate={sharedSelectedDate}
-                            onSharedDateChange={handleSharedDateChange}
-                        />
-                    </View>
+                    <WorkoutsTab
+                        isSelecting={isSelecting}
+                        selectedItems={selectedItems}
+                        onSelect={toggleSelect}
+                        onDeleteRecent={handleDeleteRecent}
+                        bubbleAnchorRef={bubbleRef}
+                        anchorId={anchorId}
+                        onDateChange={(dateLabel) => handleDateChange(dateLabel)}
+                        navigateToDate={navigateToDate}
+                        sharedSelectedDate={sharedSelectedDate}
+                        onSharedDateChange={handleSharedDateChange}
+                    />
                 )}
 
                 {selectedTab === 'splits' && (
@@ -469,8 +429,6 @@ export default function ActivityScreen() {
                         onToggleSaved={toggleSaved}
                         isSaved={isSaved}
                         onStartRoutine={handleStartLayout}
-                        onEditLayout={(layout) => router.push(`/modals/editLayout?layoutId=${layout.id}`)}
-                        onDeleteLayout={handleDeleteLayout}
                         onEditOptions={handleEditOptions}
                         bubbleRef={bubbleRef}
                         anchorId={anchorId || undefined}
@@ -486,7 +444,6 @@ export default function ActivityScreen() {
                         {tabs.map((tab) => (
                             <TabButton
                                 key={tab.id}
-                                tab={tab.id}
                                 label={tab.label}
                                 icon={tab.icon}
                                 isSelected={selectedTab === tab.id}
@@ -527,6 +484,8 @@ export default function ActivityScreen() {
                 </Animated.View>
             </View>
 
+
+            {/* Delete Selected Confirmation ISlide */}
             <ISlide visible={isSlideVisible} onClose={handleCancelMultiDelete} size="small">
                 <Container width={"90%"} height={"auto"} direction="column" style={{ paddingBottom: 16 }}>
                     <Text style={{
@@ -560,6 +519,8 @@ export default function ActivityScreen() {
                 </Container>
             </ISlide>
 
+
+            {/* Delete Confirmation Bubble */}
             <IBubble
                 visible={bubbleVisible}
                 onClose={handleCancelDelete}
@@ -690,7 +651,7 @@ export default function ActivityScreen() {
                     }}>
                         "{editOptionsLayout?.name || 'this template'}"
                     </Text>
-                    
+
                     <View style={{ gap: 12, width: '100%' }}>
                         <OptionButton
                             title="Start Workout"
@@ -703,21 +664,21 @@ export default function ActivityScreen() {
                             icon={<Ionicons name="play" size={20} color={color.accent} />}
                             color={color.accent}
                         />
-                        
+
                         <OptionButton
                             title="Edit Template"
                             onPress={handleEditFromOptions}
                             icon={<Ionicons name="create-outline" size={20} color={color.text} />}
                             color={color.text}
                         />
-                        
+
                         <OptionButton
                             title="Clone Template"
                             onPress={handleCloneFromOptions}
                             icon={<Ionicons name="copy-outline" size={20} color={color.text} />}
                             color={color.text}
                         />
-                        
+
                         <OptionButton
                             title="Delete Template"
                             onPress={handleDeleteFromOptions}
@@ -748,7 +709,7 @@ export default function ActivityScreen() {
                     }}>
                         Clone "{cloneLayout?.name || 'this template'}"
                     </Text>
-                    
+
                     <View style={{ gap: 16, width: '100%' }}>
                         <View>
                             <TextInput
@@ -778,7 +739,7 @@ export default function ActivityScreen() {
                                 Clone Name
                             </Text>
                         </View>
-                        
+
                         <View style={{ flexDirection: 'row', gap: 12 }}>
                             <IButton
                                 height={44}

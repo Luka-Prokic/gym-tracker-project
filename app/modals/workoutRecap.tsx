@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { useTheme } from '../../components/context/ThemeContext';
 import Colors, { Themes } from '../../constants/Colors';
@@ -10,7 +10,6 @@ import { ReadOnlyGymTable } from '../../components/gym/readonly/ReadOnlyGymTable
 import { ReadOnlySuperSetTable } from '../../components/gym/readonly/ReadOnlySuperSetTable';
 import { ReadOnlyCardioTable } from '../../components/gym/readonly/ReadOnlyCardioTable';
 import { isGymExercise, isSuperSet, isCardioExercise } from '../../components/context/utils/GymUtils';
-import ITopBar from '../../components/headers/ITopBar';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IButton from '../../components/buttons/IButton';
@@ -41,14 +40,6 @@ export default function WorkoutRecap() {
     const layout = getLayout(layoutId);
 
     const navigation = useNavigation();
-
-    useEffect(() => {
-        navigation.setOptions({
-            header: () => (
-                <ITopBar />
-            )
-        });
-    }, [navigation]);
 
     if (!routine || !layout) {
         return (

@@ -1,7 +1,6 @@
 import IButton from "../buttons/IButton";
 import { useTheme } from "../context/ThemeContext";
 import Colors, { Themes } from "../../constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
 import useBubbleLayout from "../bubbles/hooks/useBubbleLayout";
 import ISlide from "../bubbles/ISlide";
 import HR from "../mis/HR";

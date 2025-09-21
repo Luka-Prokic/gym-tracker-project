@@ -1,4 +1,3 @@
-import React from "react";
 import { Stack, router } from "expo-router";
 import { StatusBar, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -52,15 +51,13 @@ function RootLayoutContent() {
                     <Stack.Screen
                         name="routines"
                         options={{
-                            presentation: "modal",
                             header: () => {
-                                const currentColor = Colors[theme as Themes];
                                 return <ITopBar
                                     title=""
                                     headerLeft={() => <></>}
                                     headerRight={() => (
                                         <IButton width={34} height={34} onPress={() => router.back()}>
-                                            <Ionicons name="close" size={24} color={currentColor.text} />
+                                            <Ionicons name="close" size={24} color={color.text} />
                                         </IButton>
                                     )}
                                 />
@@ -69,23 +66,23 @@ function RootLayoutContent() {
                     />
                     <Stack.Screen
                         name="stats"
-                        options={{
-                            presentation: "card",
-                            headerShown: true,
-                            header: () => <MainHeader
-                                navigation={{} as any}
-                                route={{ name: 'stats' } as any}
-                                options={{
-                                    headerLeft: () => <></>
-                                }}
-                                scrollY={0}
-                            />
+                          options={{
+                            header: () => {
+                                return <ITopBar
+                                    title=""
+                                    headerLeft={() => <></>}
+                                    headerRight={() => (
+                                        <IButton width={34} height={34} onPress={() => router.back()}>
+                                            <Ionicons name="close" size={24} color={color.text} />
+                                        </IButton>
+                                    )}
+                                />
+                            }
                         }}
-                    />
+                            />
                     <Stack.Screen
                         name="settings"
                         options={{
-                            presentation: "modal",
                             headerShown: false
                         }}
                     />

@@ -17,13 +17,11 @@ interface RoutineCardProps {
     showFavorite?: boolean;
     isFavorite?: boolean;
     showActions?: boolean;
-    showEdit?: boolean;
     savedContext?: boolean;
     customName?: string;
     showDateTime?: boolean;
     onPress: () => void;
     onToggleFavorite?: () => void;
-    onEdit?: () => void;
     onDelete?: () => void;
     isSelecting?: boolean;
     selected?: boolean;
@@ -36,13 +34,11 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     showFavorite = false,
     isFavorite = false,
     showActions = false,
-    showEdit = true,
     savedContext = false,
     customName,
     showDateTime = false,
     onPress,
     onToggleFavorite,
-    onEdit,
     onDelete,
     isSelecting,
     selected,

@@ -6,15 +6,13 @@ import { DndProvider, Draggable, DraggableGrid, UniqueIdentifier } from "@mgcrea
 import { SCREEN_WIDTH } from "../../constants/ScreenWidth";
 import { useEffect, useState } from "react";
 import LEDstrip from "../../components/mis/LEDstrip";
-import { RoutineLayout, useRoutine } from "../../components/context/RoutineZustand";
+import { useRoutine } from "../../components/context/RoutineZustand";
 import { router } from "expo-router";
-import { useExerciseLayout } from "../../components/context/ExerciseLayoutZustand";
 import { useStartNewRoutine } from "../../assets/hooks/useStartNewRoutine";
 
 export default function WidgetLayout() {
     const { widgetLayout, setWidgetLayout, updateWidget } = useCaka();
-    const { activeRoutine, setActiveRoutine, checkAndAddRoutine } = useRoutine();
-    const { saveLayout } = useExerciseLayout();
+    const { activeRoutine } = useRoutine();
     const { startNewRoutine } = useStartNewRoutine();
     const [key, setKey] = useState(0);
 
@@ -22,14 +20,14 @@ export default function WidgetLayout() {
 
     const handleOrderChange = (newOrder: UniqueIdentifier[]) => {
 
-        const reorderedItems = newOrder.map(id =>
+        const reorderedItems = newOrder.map((id: any) =>
             widgetLayout.find(item => item.id === id)!
         );
 
         if (reorderedItems === widgetLayout)
             return;
 
-        const hiddenWidgets = widgetLayout.filter(item => item.hidden);
+        const hiddenWidgets = widgetLayout.filter((item: any) => item.hidden);
         const updatedLayout = [...reorderedItems, ...hiddenWidgets];
 
         setWidgetLayout(updatedLayout);

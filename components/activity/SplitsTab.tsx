@@ -19,8 +19,6 @@ interface SplitsTabProps {
     onToggleSaved: (id: string) => void;
     isSaved: (id: string) => boolean;
     onStartRoutine: (layout: Layout) => void;
-    onEditLayout: (layout: Layout) => void;
-    onDeleteLayout: (layout: Layout) => void;
     onEditOptions?: (layout: Layout) => void;
     bubbleRef?: React.RefObject<any>;
     anchorId?: string;
@@ -36,9 +34,6 @@ export const SplitsTab: React.FC<SplitsTabProps> = ({
     onSelect,
     onToggleSaved,
     isSaved,
-    onStartRoutine,
-    onEditLayout,
-    onDeleteLayout,
     onEditOptions,
     bubbleRef,
     anchorId
@@ -111,12 +106,10 @@ export const SplitsTab: React.FC<SplitsTabProps> = ({
                             layout={layout}
                             showFavorite={false}
                             showActions={true}
-                            showEdit={false}
                             showDateTime={false}
                             isFavorite={isSaved(layout.id)}
                             onPress={() => { }}
                             onToggleFavorite={() => onToggleSaved(layout.id)}
-                            onEdit={() => onEditLayout(layout)}
                             onEditOptions={() => onEditOptions?.(layout)}
                             isSelecting={isSelecting}
                             selected={selectedItems.has(layout.id)}

@@ -28,24 +28,12 @@ export const TemplateSearchBar: React.FC<TemplateSearchBarProps> = ({ value, onC
     }
 
     return (
-        <View style={[
-            {
-                width: "100%",
-                overflow: "hidden",
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: color.border,
-                backgroundColor: color.input,
-                shadowColor: color.shadow,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 2,
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                height: 44,
-            }
+        <View style={[styles.container,
+        {
+            borderColor: color.border,
+            backgroundColor: color.input,
+            shadowColor: color.shadow,
+        }
         ]}>
             <IButton width={44} height={44} onPress={handleSearchPress}>
                 <Ionicons name="search" size={24} color={color.text} />
@@ -73,6 +61,20 @@ export const TemplateSearchBar: React.FC<TemplateSearchBarProps> = ({ value, onC
 };
 
 const styles = StyleSheet.create({
+    container: {
+        width: "100%",
+        overflow: "hidden",
+        borderRadius: 10,
+        borderWidth: 1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        height: 44,
+    },
     input: {
         fontSize: 16,
         textAlign: "left",

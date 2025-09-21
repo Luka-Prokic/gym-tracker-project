@@ -1,7 +1,6 @@
 import { useTheme } from "../components/context/ThemeContext";
 import Colors, { Themes } from "../constants/Colors";
-import React from "react";
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { ScrollView } from "react-native-gesture-handler";
 
 
@@ -28,10 +27,6 @@ export default function ProfileScreen() {
         </View>
     );
 }
-
-const styless = StyleSheet.create({
-    
-});
 
 
 

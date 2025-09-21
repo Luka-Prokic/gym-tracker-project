@@ -13,15 +13,15 @@ interface LayoutActionsProps {
     onDelete?: () => void;
 }
 
-const LayoutActions: React.FC<LayoutActionsProps> = ({ 
-    layoutId, 
-    layoutName, 
-    onEdit, 
-    onDelete 
+const LayoutActions: React.FC<LayoutActionsProps> = ({
+    layoutId,
+    layoutName,
+    onEdit,
+    onDelete
 }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
-    const { safeDeleteLayout, safeEditLayout } = useExerciseLayout();
+    const { safeDeleteLayout } = useExerciseLayout();
 
     const handleDelete = () => {
         Alert.alert(
@@ -52,23 +52,17 @@ const LayoutActions: React.FC<LayoutActionsProps> = ({
         );
     };
 
-    const handleEdit = () => {
-        // For now, just call the onEdit callback
-        // In the future, this could open an edit modal
-        onEdit?.();
-    };
-
     return (
         <View style={styles.container}>
             <IButton
                 width={40}
                 height={40}
-                onPress={handleEdit}
+                onPress={() => onEdit?.()}
                 style={styles.actionButton}
             >
                 <Ionicons name="create-outline" size={20} color={color.accent} />
             </IButton>
-            
+
             <IButton
                 width={40}
                 height={40}

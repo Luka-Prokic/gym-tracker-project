@@ -6,21 +6,18 @@ import { UserSettings } from "@/components/context/user/types";
 
 export const defaultWidgetLayout: WidgetBlueprint[] = [
     { id: "11233d", label: "Quick Start", arrow: true, widgetSettings: { resize: true }, mode: "one", key: 1 },
-    { id: "12234d", label: "Statistics", widgetSettings: { hidden: true, resize: "two" }, mode: "one", key: 7 },
-    { id: "23233d", label: "Session 1", widgetSettings: { hidden: true, rename: true, resize: "two" }, mode: "one", key: 2 },
-    { id: "31122d", label: "Monkey", widgetSettings: { hidden: true, rename: true, resize: true }, mode: "one", key: 3 },
-    { id: "44233d", label: "Crossfit", widgetSettings: { hidden: true, rename: true, resize: true }, mode: "one", key: 4 },
-    { id: "51233d", label: "Ape", widgetSettings: { hidden: true, rename: true, resize: true }, mode: "one", key: 5 },
-    { id: "62323d", label: "Blank", widgetSettings: { hidden: true, rename: true, resize: true }, mode: "one", key: 6 },
+    { id: "12234d", label: "Stats", widgetSettings: { hidden: true, resize: "two" }, mode: "one", key: 7 },
+    { id: "23233d", label: "Template 1", widgetSettings: { hidden: true, rename: true, resize: "two" }, mode: "one", key: 2 },
+    { id: "31122d", label: "Awards", widgetSettings: { hidden: true, resize: true }, mode: "one", key: 3 },
+    { id: "44233d", label: "Daily", widgetSettings: { hidden: true, resize: true }, mode: "one", key: 4 },
 ];
 
 export const defaultWidgets: WidgetBlueprint["id"][] = [
     "11233d",
+    "12234d",
     "23233d",
     "31122d",
     "44233d",
-    "51233d",
-    "62323d"
 ];
 
 export const defaultGymLayout: Layout = {

@@ -1,10 +1,8 @@
-import React from "react";
 import { Tabs } from "expo-router";
 import Colors, { Themes } from "../../constants/Colors";
 import { useTheme } from "../../components/context/ThemeContext";
 import CakaIcon from "../../components/mis/CakaIcon";
 import IProfileBar from "../../components/headers/IProfileBar";
-import MainHeader from "../../components/headers/main/MainHeader";
 
 export default function TabLayout() {
     const { theme } = useTheme();

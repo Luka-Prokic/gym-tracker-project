@@ -9,27 +9,27 @@ export const useRoutineData = () => {
     // Filter routines by type and status - only show finished routines
     const recentRoutines = useMemo(() => {
         const filtered = routines
-            .filter(routine => routine.status === 'routine' && routine.type === 'gym' && routine.isFinished === true)
+            .filter((routine: any) => routine.status === 'routine' && routine.type === 'gym' && routine.isFinished === true)
             .sort((a, b) => (b.lastStartTime || 0) - (a.lastStartTime || 0))
             .slice(0, 10);
-        
+
         // Filter out routines that don't have corresponding layouts (ghost routines)
-        const validRoutines = filtered.filter(routine => {
+        const validRoutines = filtered.filter((routine: any) => {
             const hasLayout = layouts.some(layout => layout.id === routine.layoutId);
             return hasLayout;
         });
-        
+
         return validRoutines;
     }, [routines, layouts]);
 
     // Filter layouts that are templates (only from routines with status: "template")
     const templateLayouts = useMemo(() => {
-        return layouts.filter(layout => {
+        return layouts.filter((layout: any) => {
             // Only show layouts that are associated with routines having status: "template"
-            const associatedTemplateRoutine = routines.find(routine => 
+            const associatedTemplateRoutine = routines.find((routine: any) =>
                 routine.layoutId === layout.id && routine.status === 'template'
             );
-            
+
             // Show layout only if it has an associated template routine
             return associatedTemplateRoutine !== undefined;
         });
@@ -37,7 +37,7 @@ export const useRoutineData = () => {
 
     // Filter layouts that are saved
     const savedLayoutsList = useMemo(() => {
-        return layouts.filter(layout => savedLayouts.includes(layout.id));
+        return layouts.filter((layout: any) => savedLayouts.includes(layout.id));
     }, [layouts, savedLayouts]);
 
     return {

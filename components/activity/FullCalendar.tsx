@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import Colors, { Themes } from '../../constants/Colors';
 import Container from '../containers/Container';
 import IButton from '../buttons/IButton';
 import ISlide from '../bubbles/ISlide';
-import { SCREEN_HEIGHT } from '@/constants/ScreenWidth';
 import { useRoutineData } from './hooks/useRoutineData';
 
 interface FullCalendarProps {
@@ -30,14 +28,14 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
     const color = Colors[theme as Themes];
     const today = useMemo(() => new Date(), []); // Memoize today to prevent re-renders
     const scrollViewRef = useRef<ScrollView>(null);
-    
+
     const [months, setMonths] = useState<Date[]>([]);
     const [selectedDay, setSelectedDay] = useState<Date | null>(selectedDate || null);
     const [currentVisibleYear, setCurrentVisibleYear] = useState<number>(new Date().getFullYear());
-    
+
     // Get routine data to check for workouts on specific dates
     const { recentRoutines } = useRoutineData();
-    
+
     // Helper function to check if a workout was done on a specific date
     const hasWorkoutOnDate = (date: Date) => {
         const dateString = date.toDateString();
@@ -55,21 +53,21 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
         if (visible) {
             const targetDate = selectedDate || new Date();
             const monthsArray = [];
-            
+
             // Load 12 previous months + current month
             for (let i = 12; i >= 0; i--) {
                 const month = new Date(targetDate);
                 month.setMonth(targetDate.getMonth() - i);
                 monthsArray.push(month);
             }
-            
+
             setMonths(monthsArray);
-            
+
             // Scroll to the very bottom of all content
             setTimeout(() => {
                 // Get the total content height and scroll to the bottom
                 scrollViewRef.current?.scrollToEnd({ animated: false });
-                
+
                 // Update the visible year to match the target date
                 setCurrentVisibleYear(targetDate.getFullYear());
             }, 100);
@@ -87,26 +85,26 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
     const generateCalendarDays = (month: Date) => {
         const year = month.getFullYear();
         const monthIndex = month.getMonth();
-        
+
         const firstDay = new Date(year, monthIndex, 1);
         const lastDay = new Date(year, monthIndex + 1, 0);
-        
+
         const days = [];
         const current = new Date(firstDay);
-        
+
         // Generate only the days of the current month
         while (current <= lastDay) {
             days.push(new Date(current));
             current.setDate(current.getDate() + 1);
         }
-        
+
         return days;
     };
 
     const handleScroll = (event: any) => {
         const offsetY = event.nativeEvent.contentOffset.y;
         const monthHeight = 280; // Approximate height of each month card
-        
+
         // Calculate which month is currently visible
         const currentMonthIndex = Math.round(offsetY / monthHeight);
         if (currentMonthIndex >= 0 && currentMonthIndex < months.length) {
@@ -128,11 +126,6 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
             }
             onClose();
         }
-    };
-
-
-    const isToday = (date: Date) => {
-        return date.toDateString() === today.toDateString();
     };
 
     const isSelected = (date: Date) => {
@@ -171,14 +164,14 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
                         const monthName = MONTHS[month.getMonth()];
                         const year = month.getFullYear();
                         const calendarDays = generateCalendarDays(month);
-                        
+
                         return (
                             <View key={`${month.getMonth()}-${year}`} style={styles.monthCard}>
                                 {/* Month Header */}
                                 <Text style={[styles.monthYear, { color: color.text }]}>
                                     {monthName}
                                 </Text>
-                                
+
                                 {/* Days of week header */}
                                 <View style={styles.daysHeader}>
                                     {DAYS_OF_WEEK.map((day, index) => (
@@ -187,21 +180,20 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
                                         </Text>
                                     ))}
                                 </View>
-                                
+
                                 {/* Calendar Grid */}
                                 <View style={styles.calendarGrid}>
                                     {calendarDays.map((date, index) => {
                                         const dayNumber = date.getDate();
                                         const dayOfWeek = date.getDay();
                                         const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday-based (0-6)
-                                        
-                                        const isTodayDay = isToday(date);
+
                                         const isSelectedDay = isSelected(date);
                                         const isFutureDay = isFuture(date);
 
                                         return (
-                                            <View 
-                                                key={`${monthIndex}-${index}`} 
+                                            <View
+                                                key={`${monthIndex}-${index}`}
                                                 style={[
                                                     styles.dayCell,
                                                     { marginLeft: index === 0 ? mondayOffset * 44 : 0 }
@@ -214,10 +206,10 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
                                                     style={[
                                                         styles.dayButton,
                                                         {
-                                                            backgroundColor: isSelectedDay 
+                                                            backgroundColor: isSelectedDay
                                                                 ? (date.toDateString() === today.toDateString() ? color.accent : color.grayText)
                                                                 : hasWorkoutOnDate(date)
-                                                                    ? color.tint 
+                                                                    ? color.tint
                                                                     : 'transparent',
                                                             opacity: isFutureDay ? 0.3 : 1,
                                                         }
@@ -226,12 +218,12 @@ export default function FullCalendar({ visible, onClose, onDateSelect, selectedD
                                                     <Text style={[
                                                         styles.dayText,
                                                         {
-                                                            color: isSelectedDay 
-                                                                ? color.primaryBackground 
+                                                            color: isSelectedDay
+                                                                ? color.primaryBackground
                                                                 : hasWorkoutOnDate(date)
-                                                                    ? color.primaryBackground 
-                                                                    : isFutureDay 
-                                                                        ? color.grayText 
+                                                                    ? color.primaryBackground
+                                                                    : isFutureDay
+                                                                        ? color.grayText
                                                                         : color.text
                                                         }
                                                     ]}>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate } from 'react-native-reanimated';
 import { router } from 'expo-router';
@@ -28,7 +28,6 @@ interface WorkoutsTabProps {
 }
 
 const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // Helper function to get week dates starting from Monday with week offset
 const getWeekDates = (weekOffset: number = 0, today: Date) => {
@@ -74,7 +73,6 @@ export default function WorkoutsTab({
     const buttonSize = Math.floor(availableWidth / 7);
     const [weekOffset, setWeekOffset] = useState<number>(0); // 0 = current week, -1 = previous week, 1 = next week
     const [selectedDay, setSelectedDay] = useState<number>(0);
-    const scrollViewRef = useRef<Animated.ScrollView>(null);
 
     // Animated value for sliding background
     const animatedPosition = useSharedValue(0);
@@ -82,7 +80,7 @@ export default function WorkoutsTab({
     // Get current week dates and find today's index (memoized to prevent re-renders)
     const weekDates = useMemo(() => getWeekDates(weekOffset, today), [weekOffset, today]);
     const todayIndex = useMemo(() =>
-        weekDates.findIndex(date => date.toDateString() === today.toDateString()),
+        weekDates.findIndex((date: Date) => date.toDateString() === today.toDateString()),
         [weekDates, today]
     );
 
@@ -156,7 +154,7 @@ export default function WorkoutsTab({
     // Sync shared selected date back to local selectedDay
     useEffect(() => {
         if (sharedSelectedDate) {
-            const dayIndex = weekDates.findIndex(date =>
+            const dayIndex = weekDates.findIndex((date: Date) =>
                 date.toDateString() === sharedSelectedDate.toDateString()
             );
             if (dayIndex >= 0 && dayIndex !== selectedDay) {
@@ -192,7 +190,7 @@ export default function WorkoutsTab({
     const { startNewRoutine } = useStartNewRoutine();
 
     // Generate display name for recent workouts
-    const getRecentWorkoutName = (layout: any, routine: any) => {
+    const getRecentWorkoutName = (layout: any) => {
         // Use layout name if it exists (for templates), otherwise use "Workout"
         return layout?.name || 'Workout';
     };
@@ -200,7 +198,7 @@ export default function WorkoutsTab({
     // Helper function to check if a workout was done on a specific date
     const hasWorkoutOnDate = (date: Date) => {
         const dateString = date.toDateString();
-        return recentRoutines.some((routine) => {
+        return recentRoutines.some((routine: any) => {
             if (routine.lastStartTime) {
                 const routineDate = new Date(routine.lastStartTime);
                 return routineDate.toDateString() === dateString;
@@ -213,7 +211,7 @@ export default function WorkoutsTab({
     const selectedDate = weekDates[selectedDay];
     const selectedDateString = selectedDate.toDateString();
 
-    const filteredRoutines = recentRoutines.filter((routine) => {
+    const filteredRoutines = recentRoutines.filter((routine: any) => {
         if (routine.lastStartTime) {
             const routineDate = new Date(routine.lastStartTime);
             return routineDate.toDateString() === selectedDateString;
@@ -224,20 +222,6 @@ export default function WorkoutsTab({
     // Create date label for selected day
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-
-    // Create date label for selected day
-    let dateLabel;
-    if (selectedDate.toDateString() === today.toDateString()) {
-        dateLabel = 'Today';
-    } else if (selectedDate.toDateString() === yesterday.toDateString()) {
-        dateLabel = 'Yesterday';
-    } else {
-        dateLabel = selectedDate.toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
 
     // Check if today is selected and has no workouts
     const isTodaySelected = selectedDate.toDateString() === today.toDateString();
@@ -265,7 +249,7 @@ export default function WorkoutsTab({
         let selectedDayIndex;
         if (newOffset === 0) {
             // If returning to current week, select today
-            const todayIndex = newWeekDates.findIndex(date =>
+            const todayIndex = newWeekDates.findIndex((date: Date) =>
                 date.toDateString() === today.toDateString()
             );
             selectedDayIndex = todayIndex >= 0 ? todayIndex : 0;
@@ -383,7 +367,7 @@ export default function WorkoutsTab({
 
                 {/* Day Buttons */}
                 <View style={[styles.dayButtonsRow, { height: buttonSize }]}>
-                    {weekDates.map((date, index) => {
+                    {weekDates.map((date: Date, index: number) => {
                         const dayNumber = date.getDate();
                         const isFuture = date.getTime() > today.getTime();
                         const isDisabled = isFuture;
@@ -420,17 +404,16 @@ export default function WorkoutsTab({
 
             {/* Workout List */}
             <IList background="transparent" width={'90%'} hrStart="None">
-                {filteredRoutines.map((routine) => {
-                    const layout = allLayouts.find(l => l.id === routine.layoutId);
+                {filteredRoutines.map((routine: any ) => {
+                    const layout = allLayouts.find((l: any) => l.id === routine.layoutId);
                     if (!layout) return null;
                     return (
                         <RoutineCard
                             key={routine.id}
                             layout={layout}
-                            customName={getRecentWorkoutName(layout, routine)}
+                            customName={getRecentWorkoutName(layout)}
                             showFavorite={false}
                             showActions={true}
-                            showEdit={false}
                             showDateTime={true}
                             isFavorite={isSaved(layout.id)}
                             onPress={() => router.push(`/modals/workoutRecap?routineId=${routine.id}&layoutId=${layout.id}`)}
@@ -449,10 +432,10 @@ export default function WorkoutsTab({
             {hasNoWorkoutsToday && (
                 <Container width={"90%"} style={styles.quickStartContainer}>
                     <View style={styles.quickStartTextContainer}>
-                        <Ionicons 
-                            name="sad-outline" 
-                            size={48} 
-                            color={color.grayText} 
+                        <Ionicons
+                            name="sad-outline"
+                            size={48}
+                            color={color.grayText}
                             style={{ marginBottom: 8 }}
                         />
                         <Text style={[styles.quickStartTitle, { color: color.text }]}>
@@ -477,10 +460,10 @@ export default function WorkoutsTab({
             {hasNoWorkoutsOtherDay && (
                 <Container width={"90%"} style={styles.noWorkoutContainer}>
                     <View style={styles.noWorkoutTextContainer}>
-                        <Ionicons 
-                            name="rainy-outline" 
-                            size={48} 
-                            color={color.grayText} 
+                        <Ionicons
+                            name="rainy-outline"
+                            size={48}
+                            color={color.grayText}
                             style={{ marginBottom: 8 }}
                         />
                         <Text style={[styles.noWorkoutTitle, { color: color.text }]}>

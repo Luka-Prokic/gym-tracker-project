@@ -23,14 +23,12 @@ export default function ModalsLayout() {
             <Stack.Screen
                 name="editLayout"
                 options={{ 
-                    presentation: "modal",
                     headerShown: false
                 }}
             />
             <Stack.Screen
                 name="all"
                 options={{ 
-                    presentation: "modal",
                     header: () => <ITopBar 
                         title="All" 
                         headerLeft={() => <></>}
@@ -41,7 +39,6 @@ export default function ModalsLayout() {
             <Stack.Screen
                 name="editProfile"
                 options={{ 
-                    presentation: "modal",
                     header: () => <ITopBar 
                         title="Edit Profile" 
                         headerLeft={() => <></>}
@@ -52,7 +49,6 @@ export default function ModalsLayout() {
             <Stack.Screen
                 name="addExercise"
                 options={{
-                    presentation: "modal",
                     header: () => <ITopBar 
                         title="Add Exercise" 
                         headerLeft={() => <></>}
@@ -68,7 +64,6 @@ export default function ModalsLayout() {
             <Stack.Screen
                 name="swapExercise"
                 options={{ 
-                    presentation: "modal",
                     header: () => <ITopBar 
                         title="Swap Exercise" 
                         headerLeft={() => <></>}
@@ -79,9 +74,18 @@ export default function ModalsLayout() {
             <Stack.Screen
                 name="superSet"
                 options={{ 
-                    presentation: "modal",
                     header: () => <ITopBar 
                         title="Super Set" 
+                        headerLeft={() => <></>}
+                        headerRight={() => <CloseButton />}
+                    />
+                }}
+            />
+            <Stack.Screen
+                name="workoutRecap"
+                options={{ 
+                    header: () => <ITopBar 
+                        title="Workout Recap" 
                         headerLeft={() => <></>}
                         headerRight={() => <CloseButton />}
                     />

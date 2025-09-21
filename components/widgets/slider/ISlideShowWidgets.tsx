@@ -9,7 +9,6 @@ import List from "../../containers/List";
 import Container from "../../containers/Container";
 import { Ionicons } from "@expo/vector-icons";
 import IButton from "../../buttons/IButton";
-import CakaIcon from "../../mis/CakaIcon";
 import useBubbleLayout from "../../bubbles/hooks/useBubbleLayout";
 import IBubble, { IBubbleSize } from "../../bubbles/IBubble";
 import WidgetSizePicker from "./WidgetSizePicker";
@@ -22,16 +21,10 @@ type ISlideWidgetsProps = {
 const ISlideShowWidgets: React.FC<ISlideWidgetsProps> = ({ visible, onClose }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
-    const { widgetsDefault, widgetsCustom, widgetLayout, addToHome } = useCaka();
-
-    const [isWidgets, setIsWidgets] = useState<boolean>(true);
+    const { widgetsDefault, widgetLayout, addToHome } = useCaka();
 
     const defaultWidgets = widgetLayout
         .filter((widget) => widgetsDefault.includes(widget.id))
-        .map(widget => ({ ...widget }));
-
-    const customWidgets = widgetLayout
-        .filter((widget) => widgetsCustom.includes(widget.id))
         .map(widget => ({ ...widget }));
 
     const handleShowWidget = (id: string) => {
@@ -43,22 +36,6 @@ const ISlideShowWidgets: React.FC<ISlideWidgetsProps> = ({ visible, onClose }) =
         <>
             <ISlide visible={visible} onClose={onClose} type="glass"
                 size="xl" style={styles.addSlide as ViewStyle}>
-                <View style={styles.addSection}>
-                    <IButton width={"50%"} height={44}
-                        style={[styles.selectedMode as ViewStyle, isWidgets ? {
-                            borderBottomColor: color.accent,
-                        } : { opacity: 0.6 }]}
-                        onPress={() => setIsWidgets(true)} >
-                        <CakaIcon name="caka-icon" fill={color.accent} size={24} />
-                    </IButton>
-                    <IButton width={"50%"} height={44}
-                        style={[styles.selectedMode as ViewStyle, !isWidgets ? {
-                            borderBottomColor: color.accent,
-                        } : { opacity: 0.6 }]}
-                        onPress={() => setIsWidgets(false)} >
-                        <Ionicons name="folder" color={color.accent} size={24} />
-                    </IButton>
-                </View>
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     pagingEnabled={true}
@@ -68,8 +45,6 @@ const ISlideShowWidgets: React.FC<ISlideWidgetsProps> = ({ visible, onClose }) =
                             overflowX: "visible",
                             width: "100%",
                             borderColor: "transparent",
-                            borderTopColor: color.accent,
-                            borderWidth: 1,
                         },
                     ]}
                     contentContainerStyle={{
@@ -77,120 +52,72 @@ const ISlideShowWidgets: React.FC<ISlideWidgetsProps> = ({ visible, onClose }) =
                         paddingBottom: 88,
                     }}
                 >
-                    {isWidgets ?
-                        <List style={styles.addContainer as ViewStyle} width={"90%"}>
-                            {defaultWidgets.map((widget) => {
-                                const { bubbleRef, top, left, width, height } = useBubbleLayout();
-                                const [sizeVisibel, setSize] = useState<boolean>(false);
+                    <List style={styles.addContainer as ViewStyle} width={"90%"}>
+                        {defaultWidgets.map((widget) => {
+                            const { bubbleRef, top, left, width, height } = useBubbleLayout();
+                            const [sizeVisibel, setSize] = useState<boolean>(false);
 
-                                return (<Container key={widget.id} width={"100%"}>
-                                    <IBubble
-                                        visible={sizeVisibel}
-                                        onClose={() => { setSize(false) }}
-                                        height={height}
-                                        width={width}
-                                        top={top}
-                                        left={left}
-                                        size={IBubbleSize.xl}
-                                    >
-                                        <Container width={"100%"} height={"100%"} direction="column" >
-                                            <WidgetSizePicker
-                                                id={widget.id}
-                                                width={170}
-                                                onPress={() => { setSize(false); handleShowWidget(widget.id); }}
-                                            />
-                                        </Container>
-                                    </IBubble>
-                                    {widget.hidden ? (
-                                        <Pressable style={[
-                                            styles.addWidget as ViewStyle,
-                                            {
-                                                borderRadius: 16,
-                                                borderWidth: 1,
-                                                borderColor: color.handle,
-                                                shadowColor: color.shadow,
-                                                shadowOffset: { width: 0, height: 12 },
-                                                shadowOpacity: 0.2,
-                                                shadowRadius: 24,
-                                            }
-                                        ]} onPress={() => setSize(true)}>
-                                            <View ref={bubbleRef}>
-                                                <IButton
-                                                    width={44}
-                                                    height={44}
-                                                    onPress={() => setSize(true)}
-                                                    style={styles.addButton as ViewStyle}
-                                                >
-                                                    <Ionicons name="add-circle" color={color.accent} size={44} />
-
-                                                </IButton>
-                                                <IWidget
-                                                    id={widget.id}
-                                                    disabled={true}
-                                                    mode="one"
-                                                    customWidth={"100%"}
-                                                />
-                                            </View>
-                                        </Pressable>
-                                    ) : (
-                                        <IWidget
+                            return (<Container key={widget.id} width={"100%"}>
+                                <IBubble
+                                    visible={sizeVisibel}
+                                    onClose={() => { setSize(false) }}
+                                    height={height}
+                                    width={width}
+                                    top={top}
+                                    left={left}
+                                    size={IBubbleSize.xl}
+                                >
+                                    <Container width={"100%"} height={"100%"} direction="column" >
+                                        <WidgetSizePicker
                                             id={widget.id}
-                                            disabled={true}
-                                            mode="one"
-                                            opacity={0.6}
-                                            customWidth={"50%"}
+                                            width={170}
+                                            onPress={() => { setSize(false); handleShowWidget(widget.id); }}
                                         />
-                                    )}
-                                </Container>)
-                            })}
-                        </List>
-                        :
-                        <>
-                            <List style={styles.addContainer as ViewStyle} width={"90%"}>
-                                {customWidgets.map((widget) => (
-                                    <Container key={widget.id} width={"100%"}>
-                                        {widget.hidden ? (
-                                            <Pressable style={[
-                                                styles.addWidget as ViewStyle,
-                                                {
-                                                    borderRadius: 16,
-                                                    borderWidth: 1,
-                                                    borderColor: color.handle,
-                                                    shadowColor: color.shadow,
-                                                    shadowOffset: { width: 0, height: 12 },
-                                                    shadowOpacity: 0.2,
-                                                    shadowRadius: 24,
-                                                }
-                                            ]} onPress={() => handleShowWidget(widget.id)}>
-                                                <IButton
-                                                    width={44}
-                                                    height={44}
-                                                    onPress={() => handleShowWidget(widget.id)}
-                                                    style={styles.addButton as ViewStyle}
-                                                >
-                                                    <Ionicons name="add-circle" color={color.accent} size={44} />
-                                                </IButton>
-                                                <IWidget
-                                                    id={widget.id}
-                                                    disabled={true}
-                                                    mode="one"
-                                                    customWidth={"100%"}
-                                                />
-                                            </Pressable>
-                                        ) : (
+                                    </Container>
+                                </IBubble>
+                                {widget.hidden ? (
+                                    <Pressable style={[
+                                        styles.addWidget as ViewStyle,
+                                        {
+                                            borderRadius: 16,
+                                            borderWidth: 1,
+                                            borderColor: color.handle,
+                                            shadowColor: color.shadow,
+                                            shadowOffset: { width: 0, height: 12 },
+                                            shadowOpacity: 0.2,
+                                            shadowRadius: 24,
+                                        }
+                                    ]} onPress={() => setSize(true)}>
+                                        <View ref={bubbleRef}>
+                                            <IButton
+                                                width={44}
+                                                height={44}
+                                                onPress={() => setSize(true)}
+                                                style={styles.addButton as ViewStyle}
+                                            >
+                                                <Ionicons name="add-circle" color={color.accent} size={44} />
+
+                                            </IButton>
                                             <IWidget
                                                 id={widget.id}
                                                 disabled={true}
                                                 mode="one"
-                                                opacity={0.6}
-                                                customWidth={"50%"}
+                                                customWidth={"100%"}
                                             />
-                                        )}
-                                    </Container>
-                                ))}
-                            </List>
-                        </>
-                    }
+                                        </View>
+                                    </Pressable>
+                                ) : (
+                                    <IWidget
+                                        id={widget.id}
+                                        disabled={true}
+                                        mode="one"
+                                        opacity={0.6}
+                                        customWidth={"50%"}
+                                    />
+                                )}
+                            </Container>)
+                        })}
+                    </List>
                 </ScrollView>
             </ISlide >
         </>

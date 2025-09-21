@@ -4,17 +4,15 @@ import { useTheme } from '../context/ThemeContext';
 import Colors, { Themes } from '../../constants/Colors';
 import IButton from '../buttons/IButton';
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityTab } from './hooks/useActivityTabs';
 
 interface TabButtonProps {
-    tab: ActivityTab;
     label: string;
     icon: string;
     isSelected: boolean;
     onPress: () => void;
 }
 
-const TabButton: React.FC<TabButtonProps> = ({ tab, label, icon, isSelected, onPress }) => {
+const TabButton: React.FC<TabButtonProps> = ({ label, icon, isSelected, onPress }) => {
     const { theme } = useTheme();
     const color = Colors[theme as Themes];
 

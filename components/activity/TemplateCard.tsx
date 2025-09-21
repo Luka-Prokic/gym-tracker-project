@@ -9,7 +9,6 @@ import { Layout } from '../context/ExerciseLayoutZustand';
 import { isGymExercise, isSuperSet, isCardioExercise } from '../context/utils/GymUtils';
 import { useRoutine } from '../context/RoutineZustand';
 import hexToRGBA from '../../assets/hooks/HEXtoRGB';
-import { SCREEN_WIDTH } from '@/constants/ScreenWidth';
 import { useBodyParts } from '../../hooks/useBodyParts';
 
 interface TemplateCardProps {
@@ -17,14 +16,10 @@ interface TemplateCardProps {
     showFavorite?: boolean;
     isFavorite?: boolean;
     showActions?: boolean;
-    showEdit?: boolean;
-    savedContext?: boolean;
     customName?: string;
     showDateTime?: boolean;
     onPress: () => void;
     onToggleFavorite?: () => void;
-    onEdit?: () => void;
-    onClone?: () => void;
     onEditOptions?: () => void;
     isSelecting?: boolean;
     selected?: boolean;
@@ -37,14 +32,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     showFavorite = false,
     isFavorite = false,
     showActions = true,
-    showEdit = true,
-    savedContext = false,
     customName,
     showDateTime = true,
     onPress,
     onToggleFavorite,
-    onEdit,
-    onClone,
     onEditOptions,
     isSelecting,
     selected,
@@ -170,7 +161,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                         </View>
                     </View>
 
-                    {/* Buttons section - 15% width */}
+                    {/* Buttons section */}
                     <View ref={bubbleAnchorRef as any} style={[styles.buttonsSection, { borderColor: color.border }]}>
                         {isSelecting ? (
                             /* Selection mode - only show selection button */
@@ -203,7 +194,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                                                     fontWeight: 'bold',
                                                     padding: 4,
                                                     transform: [{ rotate: '90deg' }]
-                                                }}>Edit</Text>
+                                                }}>USE</Text>
                                             </IButton>
                                         )}
                                     </View>

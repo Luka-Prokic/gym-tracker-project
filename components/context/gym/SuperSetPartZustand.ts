@@ -1,6 +1,6 @@
 import { storage } from "../CakaAppZustand";
 import { CardioExercise, GymExercise, Layout, LayoutItem, SuperSet, SuperSetSettings } from "../ExerciseLayoutZustand";
-import { isGymExercise, isSuperSet, makeId } from "../utils/GymUtils";
+import { isSuperSet, makeId } from "../utils/GymUtils";
 
 export const createSuperSetZustand = (set: any, get: any) => ({
 
