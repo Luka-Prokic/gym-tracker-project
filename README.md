@@ -6,7 +6,7 @@ Built with **TypeScript**, the app allows users to customize routines, log exerc
 ---
 
 ## Features (Current Progress)
-
+  
 ### ✅ Implemented
 -  **Routine customization** – add and organize exercises  
 -  **Workout timer** with automatic rest tracking  
