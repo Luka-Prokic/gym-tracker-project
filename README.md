@@ -10,7 +10,7 @@ Built with **TypeScript**, the app allows users to customize routines, log exerc
 ### ✅ Implemented
 -  **Routine customization** – add and organize exercises  
 -  **Workout timer** with automatic rest tracking  
--  **Widget-based layout** for flexible home screen organization  
+-  **Widget-based layout** for flexible home screen organization   
 -  **Multiple themes** (light, dark, + 4 custom themes)  
 -  **Offline-first** – no internet required  
 
