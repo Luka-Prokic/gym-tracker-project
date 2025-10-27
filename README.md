@@ -2,7 +2,7 @@
   
 A sleek, **iOS-inspired React Native app** for tracking gym workouts.  
 Built with **TypeScript**, the app allows users to customize routines, log exercises, and track progress completely offline.  
-
+  
 ---
 
 ## Features (Current Progress)
